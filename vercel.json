@@ -1,0 +1,24 @@
+{
+  "buildCommand": "node build.js",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [{ "source": "/work/:slug", "destination": "/case.html" }],
+  "redirects": [
+    { "source": "/google-apps-script/:path*", "destination": "/", "permanent": false },
+    { "source": "/_source/:path*", "destination": "/", "permanent": false },
+    { "source": "/(build\\.js|package\\.json|README\\.md|CREDITS\\.md)", "destination": "/", "permanent": false }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+      { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+      { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" } ] },
+    { "source": "/admin.html", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" }, { "key": "Cache-Control", "value": "no-store" } ] },
+    { "source": "/admin", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" }, { "key": "Cache-Control", "value": "no-store" } ] },
+    { "source": "/js/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" } ] },
+    { "source": "/css/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" } ] },
+    { "source": "/assets/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ] }
+  ]
+}

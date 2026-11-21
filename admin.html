@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ASCII Solutions – Admin</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{--green:#0E5A3E;--green2:#17805A;--mint:#EAF8EF;--amber:#FFB400;--amber2:#FF8A00;--cream:#FFF7E3;--ink:#2A1C10;--mut:#7a6a55;--line:#eadfc2;--red:#d4291f;--card:#fff;--r:14px;--sh:0 4px 14px rgba(60,35,5,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;background:var(--cream);color:var(--ink);font-size:15px;line-height:1.5;min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid #1a73e8;outline-offset:2px}
+
+/* ---------- login ---------- */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 0,#fff,var(--cream) 70%)}
+.login-card{width:100%;max-width:400px;background:#fff;border:2px solid #e3a62a;border-radius:20px;padding:28px 24px;box-shadow:0 14px 40px rgba(60,35,5,.15);text-align:center}
+.login-card .logo{font-size:44px;line-height:1}
+.login-card h1{font-size:1.4rem;margin:8px 0 2px;color:var(--green)}
+.login-card p{color:var(--mut);font-size:.9rem;margin-bottom:16px}
+.login-card input{width:100%;padding:12px 14px;border:1.5px solid #ddd0ad;border-radius:12px;font-size:1rem;margin-bottom:12px;background:#fffefa}
+.login-card input:focus{outline:0;border-color:var(--green);box-shadow:0 0 0 3px rgba(23,128,90,.2)}
+.err-box{background:#fdf2e9;border:1.5px solid #f5b796;color:#9c2a0c;border-radius:10px;padding:9px 12px;font-size:.88rem;margin-bottom:12px;text-align:left}
+
+/* ---------- buttons ---------- */
+.btn{border:0;border-radius:10px;padding:9px 16px;font-weight:600;font-size:.92rem;background:#efe6d2;color:var(--ink);transition:transform .1s,background .15s}
+.btn:hover{background:#e6d9b8}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:linear-gradient(180deg,#17a06e,var(--green));color:#fff;box-shadow:0 3px 0 #0a3f2b}
+.btn.pri:hover{background:linear-gradient(180deg,#1bb07a,var(--green2))}
+.btn.amb{background:linear-gradient(180deg,#FFC93C,var(--amber2));color:#2b1a0c;box-shadow:0 3px 0 #b25e00}
+.btn.ghost{background:#fff;border:1.5px dashed #cdbb8a;color:var(--green)}
+.btn.ghost:hover{background:var(--mint)}
+.btn.danger{background:#fee2e2;color:#991b1b}
+.btn.block{width:100%;padding:12px}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.ib{width:32px;height:32px;border:0;border-radius:8px;background:#f4ecd8;font-size:.95rem;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ib:hover{background:#e9dcb8}
+.ib:disabled{opacity:.35;cursor:default}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+.top-in{max-width:960px;margin:auto;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.brand{font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:8px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{font-weight:400;opacity:.85;font-size:.78rem;display:block;line-height:1.1}
+.top .btn{padding:8px 12px;font-size:.85rem}
+.top .btn.save{background:linear-gradient(180deg,#FFC93C,var(--amber2));color:#2b1a0c;box-shadow:0 3px 0 #b25e00;font-weight:700}
+.top .btn.save.dirty{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{scale:1.06}}
+.top .btn.lite{background:rgba(255,255,255,.18);color:#fff}
+.top .btn.lite:hover{background:rgba(255,255,255,.3)}
+
+
+.tabs-in{max-width:960px;margin:auto;display:flex;gap:4px;padding:6px 10px;overflow-x:auto;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{border:0;background:transparent;padding:8px 14px;border-radius:10px;font-weight:600;color:var(--mut);white-space:nowrap;font-size:.95rem}
+.tab:hover{background:var(--cream)}
+.tab.on{background:var(--mint);color:var(--green)}
+
+.wrap{max-width:960px;margin:auto;padding:16px 12px 90px}
+.hint{background:#fff8e1;border:1.5px solid #f3dc8c;border-radius:12px;padding:10px 14px;font-size:.88rem;color:#6b5420;margin-bottom:14px}
+.hint b{color:#4d3a10}
+
+/* ---------- section cards ---------- */
+.sec{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden;transition:opacity .2s}
+.sec.off{opacity:.62;background:#faf6ea}
+.sec-h{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
+.sec-ic{width:38px;height:38px;border-radius:11px;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex:none}
+.sec.off .sec-ic{background:#eee}
+.sec-t{flex:1;min-width:0}
+.sec-t b{display:block;font-size:1rem;line-height:1.25}
+.sec-t span{display:block;font-size:.8rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sec-act{display:flex;align-items:center;gap:6px;flex:none}
+.chev{transition:transform .2s;color:var(--mut);font-size:.8rem}
+.sec.open .chev{transform:rotate(180deg)}
+.sec-b{display:none;padding:4px 14px 16px;border-top:1px dashed var(--line);background:#fffdf8}
+.sec.open .sec-b{display:block}
+.badge{font-size:.72rem;background:var(--mint);color:var(--green);padding:2px 8px;border-radius:20px;font-weight:600}
+
+/* ---------- switch ---------- */
+.sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.sw input{position:absolute;opacity:0;width:0;height:0}
+.sw-t{width:44px;height:25px;border-radius:25px;background:#cfc6b0;position:relative;transition:background .2s;flex:none}
+.sw-t::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.sw input:checked+.sw-t{background:var(--green2)}
+.sw input:checked+.sw-t::after{transform:translateX(19px)}
+.sw input:focus-visible+.sw-t{outline:3px solid #1a73e8;outline-offset:2px}
+.sw-l{font-size:.85rem;font-weight:600}
+
+/* ---------- fields ---------- */
+.fld{margin-top:12px}
+.fld label{display:block;font-weight:600;font-size:.88rem;margin-bottom:4px}
+.fld input,.fld textarea,.fld select{width:100%;border:1.5px solid #ddd0ad;border-radius:10px;padding:9px 12px;background:#fff;font-size:.95rem}
+.fld input:focus,.fld textarea:focus,.fld select:focus{outline:0;border-color:var(--green);box-shadow:0 0 0 3px rgba(23,128,90,.18)}
+.fld small{display:block;color:var(--mut);font-size:.78rem;margin-top:3px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:560px){.row2,.row3{grid-template-columns:1fr}}
+.sub-h{font-weight:700;color:var(--green);margin:18px 0 0;font-size:.95rem;display:flex;align-items:center;gap:6px}
+.sub-h::before{content:"";width:4px;height:16px;border-radius:3px;background:linear-gradient(var(--amber),var(--amber2))}
+
+/* ---------- lists ---------- */
+.list{display:grid;gap:8px;margin-top:6px}
+.li{display:flex;gap:8px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px}
+.li .th{width:46px;height:46px;border-radius:8px;object-fit:cover;background:#eee;flex:none;border:1px solid var(--line)}
+.li .th.bad{opacity:.25}
+.li input,.li textarea{flex:1;min-width:0;border:1.5px solid #ddd0ad;border-radius:8px;padding:8px 10px;background:#fffefa;font-size:.9rem}
+.li input:focus,.li textarea:focus{outline:0;border-color:var(--green)}
+.li-b{display:flex;gap:4px;flex:none}
+@media(max-width:560px){.li{flex-wrap:wrap}.li input,.li textarea{flex:1 1 100%;order:3}.li-b{margin-left:auto}}
+.prod{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:10px;box-shadow:var(--sh)}
+.prod.off{opacity:.6;background:#faf6ea}
+.prod-h{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.prod-h .th{width:54px;height:54px;border-radius:10px;object-fit:cover;background:#eee;border:1px solid var(--line);flex:none}
+.prod-h .th.bad{opacity:.25}
+.prod-h b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-h code{font-size:.72rem;color:var(--mut);background:#f4ecd8;padding:1px 6px;border-radius:6px}
+.mt{margin-top:14px}
+
+/* ---------- orders ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+.stat b{display:block;font-size:1.35rem;color:var(--green);line-height:1.2}
+.stat span{font-size:.78rem;color:var(--mut)}
+.ord{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:10px;box-shadow:var(--sh)}
+.ord-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.ord-h b{font-size:1rem}
+.ord-h small{color:var(--mut)}
+.ord-b{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:8px;font-size:.88rem}
+@media(max-width:560px){.ord-b{grid-template-columns:1fr}}
+.ord-b div span{color:var(--mut);font-size:.76rem;display:block}
+.ord-b .full{grid-column:1/-1}
+.ord-b pre{font-family:inherit;white-space:pre-wrap;word-break:break-word}
+.ord-t{font-weight:700;color:var(--green)}
+.st{border:0;border-radius:20px;padding:5px 10px;font-weight:700;font-size:.82rem}
+.st.New{background:#FEF3C7;color:#92400E}.st.Processing{background:#DBEAFE;color:#1E40AF}.st.Delivered{background:#D1FAE5;color:#065F46}.st.Cancelled{background:#FEE2E2;color:#991B1B}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.cards{grid-template-columns:1fr}}
+.cbox{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.cbox h3{font-size:1rem;color:var(--green);margin-bottom:4px}
+.cbox p{font-size:.85rem;color:var(--mut);margin-bottom:10px}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:#1e293b;color:#fff;padding:11px 18px;border-radius:12px;font-size:.92rem;opacity:0;pointer-events:none;transition:all .25s;z-index:100;max-width:92vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.ok{background:#0f5132}.toast.bad{background:#9c2a0c}
+.spinner{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:999px){}
+.colr{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:10px}
+.colr label{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;font-size:.88rem;font-weight:600}
+.colr input[type=color]{width:42px;height:34px;border:0;padding:0;background:none;cursor:pointer;flex:none}
+.colr span small{display:block;font-weight:400;color:var(--mut);font-size:.74rem}
+.ib.pick{width:auto;padding:0 9px;font-size:.78rem;font-weight:600;white-space:nowrap}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== নতুন লেআউট: ডানদিকে সাইডবার ===== */
+.shell{display:flex;align-items:flex-start;min-height:100vh}
+.col{flex:1;min-width:0;order:1}
+.pv{width:400px;flex:none;position:sticky;top:0;height:100vh;order:2;background:#fff;border-left:2px solid var(--line);display:flex;flex-direction:column}
+.pv-h{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--green);color:#fff}
+.pv iframe{flex:1;border:0;width:100%;background:#fff}
+.side{width:268px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;background:#fff;border-left:1px solid var(--line);padding:14px 10px 50px;order:3}
+.side-h{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:1.05rem;color:var(--green);padding:2px 6px 10px}
+.side-grp{font-size:.74rem;font-weight:700;color:var(--mut);letter-spacing:.3px;padding:14px 8px 6px}
+.si{display:flex;align-items:center;gap:9px;width:100%;border:0;background:transparent;padding:8px 9px;border-radius:10px;text-align:left;font-size:.92rem;font-weight:600;color:var(--ink)}
+.si:hover{background:var(--cream)}
+.si.on{background:var(--mint);color:var(--green)}
+.si .ic{width:26px;text-align:center;font-size:1.05rem;flex:none}
+.si .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si .dot{width:9px;height:9px;border-radius:50%;background:#22a06b;flex:none}
+.si .dot.off{background:#c9c0ac}
+.si.add{color:var(--green);border:1.5px dashed #cdbb8a;margin:8px 0 2px;justify-content:center}
+.scrim{display:none}
+#menuBtn{display:none}
+.ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;box-shadow:var(--sh)}
+.ph .sec-ic{flex:none}
+.ph h2{font-size:1.15rem;line-height:1.3}
+.ph p{font-size:.82rem;color:var(--mut)}
+.ph .grow{flex:1;min-width:140px}
+.pg{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:4px 16px 18px;box-shadow:var(--sh)}
+.pg.off{opacity:.65}
+.fld select{background:#fff}
+.cardbox{background:#fffdf8;border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+.cardbox .li-b{margin-top:6px}
+.cardrow{display:flex;gap:8px;align-items:center}
+.preset{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.pbtn{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;font-weight:600;font-size:.85rem;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.pbtn:hover{border-color:var(--green)}
+.sw-strip{display:flex;height:16px;width:110px;border-radius:6px;overflow:hidden}
+.sw-strip i{flex:1}
+.tpl{width:100%;min-height:90px;font-family:Consolas,monospace;font-size:.78rem;border:1.5px solid #ddd0ad;border-radius:10px;padding:8px;background:#fffefa}
+ol.steps{padding-left:20px;line-height:1.9;font-size:.93rem}
+code{background:#f4ecd8;padding:1px 6px;border-radius:6px;font-size:.85em}
+.ord-row{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px}
+.ord-row.off{opacity:.6}
+.ord-row .nm{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+@media(max-width:999px){
+  .pv{display:none!important}
+  .side{position:fixed;right:0;top:0;bottom:0;z-index:70;transform:translateX(105%);transition:transform .25s;box-shadow:-10px 0 30px rgba(0,0,0,.25);width:min(86vw,300px)}
+  .side.open{transform:none}
+  .scrim.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:65}
+  #menuBtn{display:inline-flex}
+}
+
+/* ===== agency admin extras ===== */
+.olist{margin-top:10px}
+.oi{background:#fff;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.oi.off{opacity:.65;background:#faf6ea}
+.oi-h{display:flex;align-items:center;gap:8px;padding:8px 10px}
+.oi-t{flex:1;min-width:0;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.95rem}
+.oi-t b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.oi-t .chev{font-size:.7rem;color:var(--mut);flex:none}
+.oi-c{display:flex;align-items:center;gap:5px;flex:none}
+.oi-b{padding:2px 14px 14px;border-top:1px dashed var(--line);background:#fffdf8}
+.sample{background:#fde8e6;color:#b42318;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:20px;flex:none}
+.hid{background:#eee;color:#666;font-size:.66rem;padding:2px 7px;border-radius:20px;flex:none}
+.cnt{text-align:right;color:var(--mut)}.cnt.over{color:#b42318;font-weight:700}
+.cpick{display:flex;gap:8px;align-items:center}
+.cpick input[type=color]{width:46px;height:38px;border:1.5px solid #ddd0ad;border-radius:8px;padding:2px;background:#fff;cursor:pointer;flex:none}
+.cpick .hex{flex:1;font-family:Consolas,monospace}
+.colr{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 14px}
+.check{list-style:none;display:grid;gap:8px;margin-top:8px}
+.check li{display:flex;gap:10px;align-items:center;color:#9a6a1a}.check li.ok{color:#05603A}.check li span{width:22px;text-align:center;font-weight:700}
+.qlinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.lbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.lbar input,.lbar select{border:1.5px solid #ddd0ad;border-radius:10px;padding:9px 12px;background:#fff;flex:1;min-width:160px}
+.cnt-line{font-size:.85rem;color:var(--mut);margin-bottom:8px}
+.bar{display:grid;grid-template-columns:minmax(90px,150px) 1fr 40px;gap:8px;align-items:center;margin:8px 0;font-size:.88rem}
+.bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-t{background:#f1ead7;border-radius:6px;height:12px;overflow:hidden}
+.bar-t i{display:block;height:100%;background:var(--green);border-radius:6px}
+.bar b{text-align:right}
+.daily{display:flex;align-items:flex-end;gap:3px;height:120px;margin:12px 0 4px}
+.dcol{flex:1;max-width:44px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative;min-width:3px}
+.dcol i{display:block;background:#2b2f3a;border-radius:3px 3px 0 0}
+.dcol em{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:.66rem;font-style:normal;color:var(--green);font-weight:700}
+.legend{font-size:.78rem;color:var(--mut);margin:0}
+.ord-b pre{font-family:inherit;white-space:pre-wrap;word-break:break-word;margin:0}
+.ord-b textarea{width:100%;border:1.5px solid #ddd0ad;border-radius:8px;padding:8px;font:inherit}
+.pv-h{gap:8px}.pv-h select{border:0;border-radius:8px;padding:5px 8px;font:inherit}
+.stats{grid-template-columns:repeat(6,1fr)}
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.bar{grid-template-columns:90px 1fr 34px}}
+.cardrow .th{width:54px;height:54px}
+.cardrow input{flex:1;min-width:0}
+
+.onoff{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:8px;flex-wrap:wrap}
+.onoff .ol{flex:1;min-width:180px;font-weight:600;font-size:.92rem}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:700;border:1.5px solid}
+.pill.on{background:#e7f8ee;color:#05603a;border-color:#a6e4c0}
+.pill.off{background:#f3f0e6;color:#7a7360;border-color:#ddd6c2}
+.warnbox{background:#fff8e1;border:1.5px solid #f3dc8c;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#6b5420;margin-bottom:14px}
+.vmsg{display:block;margin-top:6px;font-weight:600}
+.vmsg.ok{color:#05603a}.vmsg.bad{color:#b42318}
+.laywrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:10px}
+.lay{position:relative;text-align:left;background:#fff;border:2.5px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;font:inherit}
+.lay:hover{border-color:var(--green)}
+.lay.on{border-color:var(--green2);box-shadow:0 0 0 4px rgba(18,183,106,.15)}
+.lay-art svg{width:100%;height:auto;border-radius:8px;display:block;border:1px solid var(--line)}
+.lay b{font-size:1rem}.lay small{color:var(--mut)}
+.lay .tick{position:absolute;top:10px;right:10px;background:var(--green2);color:#fff;border-radius:999px;font-size:.75rem;font-weight:700;padding:3px 10px}
+.bulk{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="login" id="loginView" hidden>
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="logo">&gt;_</div>
+    <h1>ASCII Solutions Admin</h1>
+    <p>পাসওয়ার্ড সার্ভারে (Google Apps Script) যাচাই হয়</p>
+    <div class="err-box" id="loginErr" hidden></div>
+    <input type="text" name="username" value="admin" autocomplete="username" hidden aria-hidden="true" tabindex="-1">
+    <input type="password" id="pw" name="password" placeholder="অ্যাডমিন পাসওয়ার্ড" autocomplete="current-password" required>
+    <button class="btn pri block" id="loginBtn" type="submit">লগইন করুন</button>
+  </form>
+</div>
+<div class="shell" id="appView" hidden>
+  <div class="col">
+    <div class="top"><div class="top-in">
+      <div class="brand">&gt;_ <span>ASCII Admin<small id="dirtyTxt">কোনো পরিবর্তন নেই</small></span></div>
+      <button class="btn lite" id="previewBtn" type="button">👁 প্রিভিউ</button>
+      <button class="btn lite" id="expBtn" type="button" title="config.js ডাউনলোড (কমিট করার জন্য)">⬇️ config.js</button>
+      <button class="btn save" id="pubBtn" type="button">🚀 প্রকাশ করুন</button>
+      <button class="btn lite" id="menuBtn" type="button" aria-label="মেনু">☰ মেনু</button>
+    </div></div>
+    <main class="wrap" id="main"></main>
+  </div>
+  <aside class="pv" id="pv" hidden><div class="pv-h"><b>👁 লাইভ প্রিভিউ</b><select id="pvPage"><option value="/">Home</option><option value="/services">Services</option><option value="/portfolio">Portfolio</option><option value="/about">About</option><option value="/pricing">Pricing</option><option value="/contact">Contact</option></select><button class="ib" id="pvClose" type="button">✕</button></div><iframe id="pvFrame" title="Preview"></iframe></aside>
+  <aside class="side" id="side" aria-label="মেনু"></aside>
+</div>
+<div class="scrim" id="scrim"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var DEF = window.SITE_CONFIG || {};
+  var CODE_TPL = "/**\n * =========================================================================\n * ASCII Solutions – ব্যাকএন্ড (Google Apps Script)\n * কাজ: Contact-form Leads, ভিজিটর অ্যাক্টিভিটি, Pixel ইভেন্ট, Report, Dashboard,\n *       অ্যাডমিন লগইন (সার্ভারে যাচাই), কনটেন্ট প্রকাশ, ছবি আপলোড (Google Drive), Analytics\n * পুরোনো Orders সংরক্ষণের কোড অক্ষত রাখা আছে (আগের শিট/ফরম্যাট ভাঙেনি)।\n * =========================================================================\n *\n * 🚀 সেটআপ: admin.html ➔ \"Google Sheet ও API\" পেজে শিটের লিংক ও অ্যাডমিন পাসওয়ার্ড দিয়ে\n *    \"Code.gs তৈরি করুন\" চাপুন, কপি করা কোড এখানে পেস্ট করুন, তারপর:\n *    ১. Save 💾   ২. setupAll ▶ Run (Permission দিন)   ৩. Deploy ➔ New deployment ➔ Web app\n *       (Execute as: Me, Access: Anyone)   ৪. /exec লিংক admin এর API ঘরে বসান\n *    কোড বদলালে: Deploy ➔ Manage deployments ➔ ✏️ ➔ New version ➔ Deploy (লিংক একই থাকে)\n * =========================================================================\n */\n\n\n/* =========================================================================\n   ১. সেটিংস (শুধু এই অংশ এডিট করুন)\n   ========================================================================= */\n\n// আপনার গুগল শিটের লিংক অথবা আইডি (admin.html এর \"Google Sheet ও API\" পেজ থেকে Code.gs তৈরি করলে এটি নিজেই বসে যায়)\n// খালি রাখলে: যে শিট থেকে Extensions → Apps Script খুলেছেন সেটিই ব্যবহার হবে\nvar SPREADSHEET_ID = \"\";\n\n// 🌐 আপনার Vercel ওয়েবসাইটের লিংক (যেমন: https://my-honey.vercel.app)\n//    এটি দিলে অর্ডারের দাম সবসময় ওয়েবসাইটের js/config.js থেকে যাচাই হয়, তাই\n//    admin.html এ দাম বদলালে এখানে আলাদা করে কিছু বদলাতে হয় না।\n//    খালি রাখলে নিচের ডিফল্ট দাম (PRODUCTS_CONFIG) ব্যবহার হবে।\nvar SITE_URL = \"\";\n\n// 🔐 অ্যাডমিন পাসওয়ার্ড (সার্ভারে যাচাই হয়)। এখানে পাসওয়ার্ড লেখা থাকে না, শুধু SHA-256 হ্যাশ থাকে।\n//    admin.html এর Setup পেজ এই দুটি লাইন নিজেই পূরণ করে দেয়।\nvar ADMIN_SALT = \"\";\nvar ADMIN_HASH = \"\";\n\n// ছবি আপলোডের জন্য Google Drive ফোল্ডারের নাম\nvar DRIVE_FOLDER_NAME = \"ASCII Solutions Assets\";\n\n// অর্ডার জমা হওয়ার ট্যাবের নাম\nvar SHEET_NAME = \"Orders\";\n\n// টাকার প্রতীক ও টাইমজোন\nvar CURRENCY = \"৳\";\nvar TIMEZONE = \"Asia/Dhaka\";\n\n// ফ্রড/স্প্যাম প্রটেকশন: একই নাম্বার থেকে কত মিনিট পর আবার অর্ডার করা যাবে\nvar FRAUD_PROTECTION = { enabled: true, cooldownMinutes: 2 };   // একই নাম্বারে ২ মিনিটের মধ্যে আবার অর্ডার করলে ফ্রড এলার্ট\n\n// ভিজিটর ট্র্যাকিং: প্রতি মিনিটে সর্বোচ্চ কতটি ট্র্যাকিং রিকোয়েস্ট নেওয়া হবে (অর্ডারকে অগ্রাধিকার দিতে)\nvar TRACK_LIMIT_PER_MIN = 90;\n\n\n/* =========================================================================\n   ২. ডিফল্ট পণ্য ও ডেলিভারি (SITE_URL খালি থাকলে এগুলোই ব্যবহার হবে)\n   ========================================================================= */\nvar PRODUCTS_CONFIG = {\n  \"m500\":   { name: \"খাঁটি মধু – ৫০০ গ্রাম\",                         price: 550 },\n  \"m1000\":  { name: \"খাঁটি মধু – ১ কেজি\",                            price: 1050 },\n  \"hn500\":  { name: \"প্রিমিয়াম হানি নাট – ৫০০ গ্রাম\",                 price: 650 },\n  \"hn1000\": { name: \"প্রিমিয়াম হানি নাট – ১ কেজি\",                    price: 1250 },\n  \"combo\":  { name: \"মেগা কম্বো (১ কেজি মধু + ১ কেজি হানি নাট)\",      price: 2200 }\n};\nvar SHIPPING_CONFIG = {\n  \"dhaka\":   { label: \"ঢাকার ভিতরে\",  charge: 60 },\n  \"outside\": { label: \"ঢাকার বাইরে\", charge: 120 }\n};\nvar FREE_SHIPPING_MIN_TOTAL = 0;\nvar MAX_QTY_PER_ITEM = 20;\n\n\n/* =========================================================================\n   ৩. শিটের কলাম ও স্ট্যাটাস\n   ========================================================================= */\nvar HEADERS = [\n  \"Order ID\", \"Date & Time\", \"Customer Name\", \"Phone Number\", \"District / Area\",\n  \"Full Address\", \"Ordered Products\", \"Total Items (Qty)\", \"Products Subtotal\",\n  \"Delivery Method\", \"Delivery Charge\", \"Grand Total Bill\", \"Customer Note\", \"Order Status\", \"Traffic Source\"\n];\nvar COL_WIDTHS = [140, 165, 170, 130, 125, 250, 280, 100, 130, 125, 120, 140, 190, 120, 160];\nvar STATUS_COL = 14;                  // Order Status কলামের নম্বর (N)\nvar STATUSES = [\"New\", \"Processing\", \"Delivered\", \"Cancelled\"];\nvar FORMAT_ROWS = 3000;               // কতগুলো সারি আগে থেকেই সুন্দর ফরম্যাটে রাখা হবে\nvar DASH_SHEET = \"Dashboard\";\nvar LEADS_SHEET = \"Leads\";\nvar SETTINGS_SHEET = \"Settings\";\nvar CFG_CHUNK = 40000;\nvar LEAD_HEADERS = [\"Lead ID\", \"Date & Time\", \"Name\", \"Phone\", \"Email\", \"Company\", \"Service Interest\", \"Budget\", \"Message\", \"Package\", \"Source Page\", \"Traffic Source\", \"Status\", \"Notes\"];\nvar LEAD_WIDTHS = [150, 165, 170, 130, 190, 150, 180, 140, 340, 110, 130, 150, 120, 240];\nvar LEAD_STATUSES = [\"New\", \"Contacted\", \"Won\", \"Lost\"];\nvar LEAD_STATUS_COL = 13;\nvar ACT_SHEET = \"User Activity\";\nvar PIX_SHEET = \"Pixel Events\";\nvar REPORT_SHEET = \"Report\";\n\n\n/* =========================================================================\n   ৪. একবার চালানোর সেটআপ (\"setupAll\" সিলেক্ট করে ▶ Run)\n   ========================================================================= */\nfunction setupAll() {\n  var ss = getSS_();\n  try { ss.setSpreadsheetTimeZone(TIMEZONE); } catch (e) {}\n  if (ss.getSheetByName(SHEET_NAME)) formatOrderSheet_(ss.getSheetByName(SHEET_NAME));   // আগের Orders শিট থাকলে ঠিকঠাক রাখা\n  getLeadsSheet_(ss, true);\n  getActivitySheet_(ss, true);\n  getPixelSheet_(ss, true);\n  getSettingsSheet_(ss);\n  buildReport_(ss);\n  buildDashboard_(ss);\n  try {\n    [LEADS_SHEET, ACT_SHEET, PIX_SHEET, REPORT_SHEET, DASH_SHEET, SETTINGS_SHEET].forEach(function (n, i) {\n      var sh = ss.getSheetByName(n); if (sh) { ss.setActiveSheet(sh); ss.moveActiveSheet(i + 1); }\n    });\n  } catch (e2) {}\n  SpreadsheetApp.flush();\n  Logger.log(\"✅ সেটআপ সম্পন্ন! Leads, User Activity, Pixel Events, Report, Dashboard ও Settings ট্যাব প্রস্তুত। এবার Deploy করুন।\");\n}\nfunction runFormatDesign() { setupAll(); }   // পুরোনো নামও কাজ করবে\n\n\n/* =========================================================================\n   ৫. GET (শুধু স্ট্যাটাস) ও POST (অর্ডার গ্রহণ)\n   ========================================================================= */\nfunction doGet(e) {\n  try {\n    if (e && e.parameter && e.parameter.action === \"config\") {\n      var pub = getPublicConfig_();\n      return json_({ success: true, rev: pub.rev, settings: pub.settings });\n    }\n  } catch (err) { return json_({ success: false, error: \"config: \" + err.message }); }\n  return json_({ success: true, message: \"API চালু আছে ✅\", time: new Date().toISOString() });\n}\n\nfunction doPost(e) {\n  var data;\n  try {\n    data = JSON.parse((e && e.postData && e.postData.contents) || \"{}\");\n  } catch (err) {\n    return json_({ success: false, error: \"রিকোয়েস্ট সঠিক নয়।\" });\n  }\n  var a = data && data.action;\n  if (a === \"track\") return handleTrack_(data);\n  if (a === \"lead\") return handleLead_(data);\n  if (a) return handleAdmin_(data);\n  return handleOrder_(data);          // পুরোনো Orders প্রবাহ – অপরিবর্তিত\n}\n\n/* ---------- অর্ডার ---------- */\nfunction bnNum_(n) { return String(n).replace(/\\d/g, function (d) { return \"০১২৩৪৫৬৭৮৯\"[d]; }); }\n\nfunction fraudResponse_(phone, existing, minutes) {\n  return json_({\n    success: false, fraudAlert: true,\n    error: \"⚠️ ফ্রড এলার্ট (Fraud Alert): এই মোবাইল নাম্বার (\" + phone + \") দিয়ে কিছুক্ষণ আগেই একটি অর্ডার (\" + existing + \") গ্রহণ করা হয়েছে। আপনার অর্ডারটি প্রক্রিয়াধীন রয়েছে, বারবার অর্ডার পাঠানোর প্রয়োজন নেই। প্রয়োজনে সরাসরি আমাদের নাম্বারে কল করুন। (\" + bnNum_(minutes) + \" মিনিট পর আবার অর্ডার করা যাবে)\"\n  });\n}\n\nfunction handleOrder_(data) {\n  var cache = CacheService.getScriptCache();\n  try {\n    // ১) লক ছাড়াই যাচাই (যাতে লকের ভেতরের কাজ খুব ছোট থাকে)\n    var cfg = getLiveConfig_();\n    var validationError = validateOrder_(data, cfg);\n    if (validationError) return json_({ success: false, error: validationError });\n\n    var reqId = String(data.reqId || \"\").replace(/[^A-Za-z0-9_-]/g, \"\").slice(0, 40);\n    if (reqId) {                                       // একই অর্ডার রিট্রাই হলে আবার সেভ হবে না\n      var done = cache.get(\"req_\" + reqId);\n      if (done) return ContentService.createTextOutput(done).setMimeType(ContentService.MimeType.JSON);\n    }\n\n    var cleanPhone = normPhone_(data.phone);\n    var minutes = Math.max(1, Number(cfg.fraudMinutes) || FRAUD_PROTECTION.cooldownMinutes);\n    var fraudKey = \"honey_guard_\" + cleanPhone;\n    if (FRAUD_PROTECTION && FRAUD_PROTECTION.enabled) {\n      var existing = cache.get(fraudKey);\n      if (existing) return fraudResponse_(cleanPhone, existing, minutes);\n    }\n\n    var items = parseOrderedItems_(data, cfg);\n    if (!items.length) return json_({ success: false, error: \"অনুগ্রহ করে কমপক্ষে একটি পণ্য সিলেক্ট করুন।\" });\n\n    // দাম সবসময় সার্ভারের কনফিগ থেকে (কাস্টমার ব্রাউজার থেকে নয়)\n    var subtotal = 0, totalQty = 0, lines = [];\n    for (var i = 0; i < items.length; i++) {\n      var it = items[i], prod = cfg.products[it.id];\n      var lineTotal = prod.price * it.qty;\n      subtotal += lineTotal; totalQty += it.qty;\n      lines.push(prod.name + \" (\" + it.qty + \"টি - \" + CURRENCY + lineTotal + \")\");\n    }\n    var shipInfo = cfg.shipping[data.shippingId];\n    var shipCharge = shipInfo.charge;\n    if (cfg.freeShippingMin > 0 && subtotal >= cfg.freeShippingMin) shipCharge = 0;\n    var grand = subtotal + shipCharge;\n\n    // ২) একসাথে অনেকে অর্ডার করলে লাইনে দাঁড়িয়ে একটি একটি করে সেভ হবে\n    var lock = LockService.getScriptLock();\n    if (!lock.tryLock(25000)) {\n      return json_({ success: false, busy: true, error: \"এই মুহূর্তে অনেকে অর্ডার করছেন। কয়েক সেকেন্ড অপেক্ষা করুন, নিজে থেকেই আবার চেষ্টা হবে।\" });\n    }\n    try {\n      if (reqId) {\n        var done2 = cache.get(\"req_\" + reqId);\n        if (done2) return ContentService.createTextOutput(done2).setMimeType(ContentService.MimeType.JSON);\n      }\n      if (FRAUD_PROTECTION && FRAUD_PROTECTION.enabled) {\n        var existing2 = cache.get(fraudKey);\n        if (existing2) return fraudResponse_(cleanPhone, existing2, minutes);\n      }\n\n      var sheet = getSheet_();\n      var orderId = nextOrderId_();\n      var row = sheet.getLastRow() + 1;\n      ensureCapacity_(sheet, row);\n\n      var rowValues = [\n        orderId, new Date(), clean_(data.name, 100), cleanPhone, clean_(data.district, 80), clean_(data.address, 350),\n        lines.join(\",\\n\"), totalQty, subtotal, shipInfo.label, shipCharge, grand,\n        clean_(data.note || \"কোনো নোট নেই\", 300), \"New\", clean_(data.source || \"direct\", 80)\n      ];\n      sheet.getRange(row, 4).setNumberFormat(\"@\");                     // ফোনের শুরুর ০ যেন না কাটে\n      sheet.getRange(row, 1, 1, HEADERS.length).setValues([rowValues]);\n\n      var result = { success: true, orderId: orderId, subtotal: subtotal, deliveryCharge: shipCharge, total: grand, itemsCount: totalQty, message: \"আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!\" };\n      try { cache.put(fraudKey, orderId, Math.max(60, minutes * 60)); } catch (c1) {}\n      if (reqId) { try { cache.put(\"req_\" + reqId, JSON.stringify(result), 600); } catch (c2) {} }\n      return json_(result);\n    } finally {\n      try { lock.releaseLock(); } catch (x) {}\n    }\n  } catch (err) {\n    return json_({ success: false, error: \"সার্ভারে সাময়িক সমস্যা হয়েছে: \" + err.message });\n  }\n}\n\n\n/* =========================================================================\n   ভিজিটর অ্যাক্টিভিটি ও Pixel ইভেন্ট সংরক্ষণ (অর্ডারের লকের সাথে সম্পর্কহীন – অর্ডার ধীর হয় না)\n   ========================================================================= */\nvar PIXEL_EVENTS = { PageView: 1, ViewContent: 1, AddToCart: 1, InitiateCheckout: 1, Purchase: 1, Lead: 1, Contact: 1, CTAClick: 1, FormStart: 1, FormSubmit: 1, FormSuccess: 1, FormError: 1 };\n\nfunction yn_(v) { return v ? \"Yes\" : \"No\"; }\nfunction num_(v, max) { var n = Number(v); return isNaN(n) ? 0 : Math.max(0, Math.min(max || 1e9, Math.round(n))); }\n\nfunction handleTrack_(d) {\n  var sid = String(d.sid || \"\").replace(/[^A-Za-z0-9_-]/g, \"\").slice(0, 40);\n  var a = d.a;\n  if (!sid || !a || typeof a !== \"object\") return json_({ success: true, skipped: true });\n\n  var cache = CacheService.getScriptCache();\n  var mk = \"trk_\" + Utilities.formatDate(new Date(), TIMEZONE, \"yyMMddHHmm\");\n  var n = parseInt(cache.get(mk) || \"0\", 10);\n  if (n >= TRACK_LIMIT_PER_MIN) return json_({ success: true, skipped: true });\n  try { cache.put(mk, String(n + 1), 90); } catch (e0) {}\n\n  var lock = LockService.getDocumentLock();            // অর্ডারের (Script) লক থেকে আলাদা\n  if (!lock.tryLock(4000)) return json_({ success: true, skipped: true });\n  try {\n    var ss = getSS_(), now = new Date();\n    var act = getActivitySheet_(ss, false);\n    var evNames = [];\n    var evs = Array.isArray(d.ev) ? d.ev.slice(0, 20) : [];\n    for (var k = 0; k < evs.length; k++) if (evs[k] && PIXEL_EVENTS[evs[k].n]) evNames.push(evs[k].n);\n\n    var cached = cache.get(\"act_\" + sid);\n    var vals = [\n      now, sid, clean_(a.src || \"direct\", 80), clean_(a.med, 60), clean_(a.camp, 80), clean_(a.ref, 80), clean_(a.dev, 20), clean_(a.scr, 20),\n      clean_(a.land || \"/\", 80), num_(a.scroll, 100), num_(a.secs, 86400), num_(a.cta, 999), yn_(a.vs), yn_(a.chk), yn_(a.form), yn_(a.ord), clean_(a.oid, 40),\n      \"\", now, clean_(a.lang, 20), num_(a.pv, 999), clean_(a.sv, 200), clean_(a.fe, 120)\n    ];\n    var row = cached ? parseInt(cached.split(\"|\")[0], 10) : 0;\n    var seen = cached ? cached.split(\"|\").slice(1).join(\"|\") : \"\";\n    if (row > 1 && String(act.getRange(row, 2).getValue()) === sid) {\n      var merged = (seen ? seen.split(\",\") : []).concat(evNames);\n      vals[17] = merged.join(\",\");\n      act.getRange(row, 2, 1, vals.length - 1).setValues([vals.slice(1)]);\n      try { cache.put(\"act_\" + sid, row + \"|\" + vals[17], 21600); } catch (e1) {}\n    } else {\n      row = act.getLastRow() + 1;\n      ensureRows_(act, row, function (start, cnt) { fmtActivity_(act, start, cnt); });\n      vals[17] = evNames.join(\",\");\n      act.getRange(row, 1, 1, vals.length).setValues([vals]);\n      try { cache.put(\"act_\" + sid, row + \"|\" + vals[17], 21600); } catch (e2) {}\n    }\n\n    var out = [];\n    for (var m = 0; m < evs.length; m++) {\n      var ev = evs[m];\n      if (!ev || !PIXEL_EVENTS[ev.n]) continue;\n      out.push([now, sid, ev.n, num_(ev.v, 1e8), \"BDT\", clean_(ev.c, 80), clean_(ev.o, 40), clean_(a.src || \"direct\", 80), clean_(a.dev, 20)]);\n    }\n    if (out.length) {\n      var pix = getPixelSheet_(ss, false), pr = pix.getLastRow() + 1;\n      ensureRows_(pix, pr + out.length, function (start, cnt) { fmtPixel_(pix, start, cnt); });\n      pix.getRange(pr, 1, out.length, 9).setValues(out);\n    }\n    return json_({ success: true });\n  } catch (err) {\n    return json_({ success: false, error: \"tracking: \" + err.message });\n  } finally {\n    try { lock.releaseLock(); } catch (x) {}\n  }\n}\n\n\n/* =========================================================================\n   ৬. দাম ও ডেলিভারি যাচাই (ওয়েবসাইটের js/config.js থেকে – এক জায়গা থেকেই সব)\n   ========================================================================= */\nfunction defaultLiveConfig_() {\n  var products = {}, shipping = {}, k;\n  for (k in PRODUCTS_CONFIG) products[k] = { name: PRODUCTS_CONFIG[k].name, price: PRODUCTS_CONFIG[k].price, active: true };\n  for (k in SHIPPING_CONFIG) shipping[k] = { label: SHIPPING_CONFIG[k].label, charge: SHIPPING_CONFIG[k].charge };\n  return { products: products, shipping: shipping, freeShippingMin: FREE_SHIPPING_MIN_TOTAL, maxQty: MAX_QTY_PER_ITEM, fraudMinutes: FRAUD_PROTECTION.cooldownMinutes };\n}\n\nfunction getLiveConfig_() {\n  var url = String(SITE_URL || \"\").replace(/\\/+$/, \"\");\n  if (!url) return defaultLiveConfig_();\n\n  var cache = CacheService.getScriptCache();\n  var hit = cache.get(\"live_cfg\");\n  if (hit) { try { return JSON.parse(hit); } catch (e) {} }\n\n  try {\n    var res = UrlFetchApp.fetch(url + \"/js/config.js?t=\" + new Date().getTime(), { muteHttpExceptions: true });\n    if (res.getResponseCode() !== 200) throw new Error(\"config.js পাওয়া যায়নি (\" + res.getResponseCode() + \")\");\n    var txt = res.getContentText();\n    var c = JSON.parse(txt.substring(txt.indexOf(\"{\"), txt.lastIndexOf(\"}\") + 1));\n\n    var out = defaultLiveConfig_();\n    if (c.products && c.products.length) {\n      out.products = {};\n      for (var i = 0; i < c.products.length; i++) {\n        var p = c.products[i];\n        if (!p || !p.id) continue;\n        out.products[p.id] = { name: String(p.name || p.id), price: Number(p.price) || 0, active: p.active !== false };\n      }\n    }\n    if (c.shipping && c.shipping.length) {\n      out.shipping = {};\n      for (var j = 0; j < c.shipping.length; j++) {\n        var sh = c.shipping[j];\n        if (!sh || !sh.id) continue;\n        out.shipping[sh.id] = { label: String(sh.label || sh.id), charge: Number(sh.charge) || 0 };\n      }\n    }\n    if (c.freeShippingMinTotal !== undefined) out.freeShippingMin = Number(c.freeShippingMinTotal) || 0;\n    if (c.maxQty !== undefined) out.maxQty = Number(c.maxQty) || MAX_QTY_PER_ITEM;\n    if (c.fraudMinutes !== undefined) out.fraudMinutes = Number(c.fraudMinutes) || FRAUD_PROTECTION.cooldownMinutes;\n    if (c.form && c.form.cooldownMinutes !== undefined) out.formCooldown = Number(c.form.cooldownMinutes) || 2;\n    try { cache.put(\"live_cfg\", JSON.stringify(out), 60); } catch (e2) {}\n    return out;\n  } catch (err) {\n    return defaultLiveConfig_();       // ওয়েবসাইট না পেলে ডিফল্ট দাম\n  }\n}\n\n\n/* =========================================================================\n   ৭. অর্ডার সংক্রান্ত ফাংশন\n   ========================================================================= */\nfunction parseOrderedItems_(d, cfg) {\n  var items = [];\n  if (Array.isArray(d.items)) {\n    for (var i = 0; i < d.items.length; i++) {\n      var it = d.items[i];\n      if (it && it.id && cfg.products[it.id] && cfg.products[it.id].active) {\n        var q = parseInt(it.qty, 10);\n        if (!isNaN(q) && q > 0) items.push({ id: it.id, qty: Math.min(q, cfg.maxQty) });\n      }\n    }\n  }\n  return items;\n}\n\nfunction validateOrder_(d, cfg) {\n  if (!d || typeof d !== \"object\") return \"অর্ডার রিকোয়েস্ট সঠিক নয়।\";\n  if (!d.name || String(d.name).trim().length < 2) return \"অনুগ্রহ করে আপনার সঠিক নাম লিখুন।\";\n  if (!/^01[3-9]\\d{8}$/.test(normPhone_(d.phone))) return \"১১ ডিজিটের সঠিক মোবাইল নাম্বার দিন (যেমন: 01712345678)।\";\n  if (!d.district || String(d.district).trim().length < 2) return \"আপনার জেলা বা এলাকার নাম দিন।\";\n  if (!d.address || String(d.address).trim().length < 6) return \"সম্পূর্ণ বিস্তারিত ঠিকানা লিখুন।\";\n  if (!cfg.shipping[d.shippingId]) return \"ডেলিভারি এলাকা নির্বাচন সঠিক নয়।\";\n  return null;\n}\n\nfunction normPhone_(v) {\n  var s = String(v || \"\").replace(/[\\s\\-()]/g, \"\");\n  s = s.replace(/[০-৯]/g, function (c) { return \"০১২৩৪৫৬৭৮৯\".indexOf(c); });\n  return s.replace(/^\\+?88/, \"\");\n}\n\nfunction clean_(v, maxLen) {\n  var s = String(v == null ? \"\" : v).replace(/[\\u0000-\\u001f]+/g, \" \").trim();\n  if (maxLen && s.length > maxLen) s = s.substring(0, maxLen);\n  return /^[=+\\-@]/.test(s) ? \"'\" + s : s;       // শিট ফর্মুলা ইনজেকশন প্রতিরোধ\n}\n\nfunction nextOrderId_() {\n  var day = Utilities.formatDate(new Date(), TIMEZONE, \"yyMMdd\");\n  var props = PropertiesService.getScriptProperties();\n  var key = \"seq_\" + day;\n  var n = parseInt(props.getProperty(key) || \"0\", 10) + 1;\n  props.setProperty(key, String(n));\n  return \"HN-\" + day + \"-\" + (\"000\" + n).slice(-4);\n}\n\n\n/* =========================================================================\n   ৮. গুগল শিট কানেকশন ও সুন্দর ফরম্যাটিং\n   ========================================================================= */\nfunction getSS_() {\n  var rawId = String(SPREADSHEET_ID || \"\").trim(), ss;\n  if (rawId) {\n    var m = rawId.match(/\\/d\\/([a-zA-Z0-9-_]+)/);\n    try { ss = SpreadsheetApp.openById(m ? m[1] : rawId); }\n    catch (e) { throw new Error(\"SPREADSHEET_ID ভুল বা অনুমতি নেই। (\" + e.message + \")\"); }\n  } else {\n    ss = SpreadsheetApp.getActiveSpreadsheet();\n  }\n  if (!ss) throw new Error(\"গুগল শিট পাওয়া যায়নি। SPREADSHEET_ID দিন।\");\n  return ss;\n}\n\nfunction getSheet_() {\n  var ss = getSS_();\n  var sheet = ss.getSheetByName(SHEET_NAME);\n  if (!sheet) {\n    var all = ss.getSheets();\n    if (all.length && all[0].getLastRow() <= 1 && all[0].getName() !== DASH_SHEET) {\n      all[0].setName(SHEET_NAME);\n      sheet = all[0];\n    }\n  }\n  if (!sheet) sheet = ss.insertSheet(SHEET_NAME);\n\n  if (sheet.getLastRow() === 0 || String(sheet.getRange(1, 1).getValue()) !== HEADERS[0]) {\n    if (sheet.getLastRow() === 0) {\n      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);\n      formatOrderSheet_(sheet);\n      try { buildDashboard_(ss); } catch (e) {}\n    } else {\n      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);\n    }\n  }\n  return sheet;\n}\n\nfunction ensureCapacity_(sheet, row) {\n  var max = sheet.getMaxRows();\n  if (row > max - 5) {\n    sheet.insertRowsAfter(max, 1000);\n    applyColumnFormats_(sheet, max + 1, 1000);\n  }\n}\n\nfunction applyColumnFormats_(sheet, startRow, numRows) {\n  var n = HEADERS.length;\n  function col(c) { return sheet.getRange(startRow, c, numRows, 1); }\n  sheet.getRange(startRow, 1, numRows, n).setFontFamily(\"Segoe UI\").setFontSize(10).setVerticalAlignment(\"middle\");\n  col(1).setHorizontalAlignment(\"center\").setFontWeight(\"bold\").setFontColor(\"#1E293B\");\n  col(2).setHorizontalAlignment(\"center\").setNumberFormat(\"dd-mmm-yyyy hh:mm AM/PM\");\n  col(3).setHorizontalAlignment(\"left\").setFontWeight(\"bold\").setFontColor(\"#0F172A\");\n  col(4).setHorizontalAlignment(\"center\").setNumberFormat(\"@\");\n  col(5).setHorizontalAlignment(\"center\");\n  col(6).setHorizontalAlignment(\"left\").setWrap(true);\n  col(7).setHorizontalAlignment(\"left\").setWrap(true);\n  col(8).setHorizontalAlignment(\"center\").setFontWeight(\"bold\");\n  col(9).setHorizontalAlignment(\"right\").setNumberFormat('\"৳\"#,##0');\n  col(10).setHorizontalAlignment(\"center\");\n  col(11).setHorizontalAlignment(\"right\").setNumberFormat('\"৳\"#,##0');\n  col(12).setHorizontalAlignment(\"right\").setFontWeight(\"bold\").setFontColor(\"#0F5132\").setBackground(\"#E6F4EA\").setNumberFormat('\"৳\"#,##0');\n  col(13).setHorizontalAlignment(\"left\").setWrap(true);\n  col(15).setHorizontalAlignment(\"left\");\n  col(14).setHorizontalAlignment(\"center\").setFontWeight(\"bold\")\n    .setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(STATUSES, true).setAllowInvalid(false).build());\n}\n\nfunction formatOrderSheet_(sheet) {\n  var n = HEADERS.length;\n  var maxRows = sheet.getMaxRows();\n  if (maxRows < FORMAT_ROWS) sheet.insertRowsAfter(maxRows, FORMAT_ROWS - maxRows);\n  var total = sheet.getMaxRows();\n\n  for (var c = 0; c < COL_WIDTHS.length; c++) sheet.setColumnWidth(c + 1, COL_WIDTHS[c]);\n\n  // হেডার\n  sheet.setFrozenRows(1);\n  sheet.setFrozenColumns(1);\n  sheet.setRowHeight(1, 42);\n  sheet.getRange(1, 1, 1, n).setValues([HEADERS])\n    .setFontWeight(\"bold\").setFontSize(11).setFontFamily(\"Segoe UI\")\n    .setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\")\n    .setHorizontalAlignment(\"center\").setVerticalAlignment(\"middle\").setWrap(true);\n\n  // ডাটা সারির কলাম ফরম্যাট (একবারেই – অর্ডার সাবমিট তাই দ্রুত হয়)\n  applyColumnFormats_(sheet, 2, total - 1);\n  sheet.getRange(2, 1, total - 1, n).setBorder(true, true, true, true, true, true, \"#CBD5E1\", SpreadsheetApp.BorderStyle.SOLID);\n\n  // জেব্রা স্ট্রাইপ (ব্যান্ডিং) – নতুন সারিতেও নিজে থেকে প্রযোজ্য\n  try {\n    var banded = sheet.getBandings();\n    for (var b = 0; b < banded.length; b++) banded[b].remove();\n    sheet.getRange(2, 1, total - 1, n).applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false)\n      .setFirstRowColor(\"#FFFFFF\").setSecondRowColor(\"#F8FAFC\");\n  } catch (e) {}\n\n  // ফিল্টার\n  try {\n    var f = sheet.getFilter();\n    if (f) f.remove();\n    sheet.getRange(1, 1, total, n).createFilter();\n  } catch (e2) {}\n\n  // স্ট্যাটাস কালার\n  var range = sheet.getRange(2, STATUS_COL, total - 1, 1);\n  var defs = [[\"New\", \"#FEF3C7\", \"#92400E\"], [\"Processing\", \"#DBEAFE\", \"#1E40AF\"], [\"Delivered\", \"#D1FAE5\", \"#065F46\"], [\"Cancelled\", \"#FEE2E2\", \"#991B1B\"]];\n  var rules = [];\n  for (var i = 0; i < defs.length; i++) {\n    rules.push(SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(defs[i][0]).setBackground(defs[i][1]).setFontColor(defs[i][2]).setRanges([range]).build());\n  }\n  sheet.setConditionalFormatRules(rules);\n\n  // ট্যাব রঙ\n  try { sheet.setTabColor(\"#0F5132\"); } catch (e3) {}\n}\n\n\n/* =========================================================================\n   ৮খ. User Activity, Pixel Events ও Report ট্যাব\n   ========================================================================= */\nvar ACT_HEADERS = [\"Date & Time\", \"Session ID\", \"Source\", \"Medium\", \"Campaign\", \"Referrer\", \"Device\", \"Screen\", \"Landing Page\",\n  \"Max Scroll %\", \"Time on Page (sec)\", \"Order Btn Clicks\", \"Video Sound On\", \"Reached Checkout\", \"Started Form\", \"Ordered\", \"Order ID\", \"Pixel Events\", \"Last Update\",\n  \"Language\", \"Pages Viewed\", \"Sections Viewed\", \"Form Events\"];\nvar ACT_WIDTHS = [165, 150, 120, 100, 130, 130, 90, 90, 110, 100, 120, 110, 110, 120, 105, 90, 140, 260, 165, 90, 100, 300, 200];\nvar PIX_HEADERS = [\"Date & Time\", \"Session ID\", \"Event\", \"Value\", \"Currency\", \"Content IDs\", \"Order ID\", \"Source\", \"Device\"];\nvar PIX_WIDTHS = [165, 150, 140, 100, 80, 160, 140, 130, 90];\n\nfunction ensureRows_(sheet, row, fmt) {\n  var max = sheet.getMaxRows();\n  if (row > max - 5) {\n    sheet.insertRowsAfter(max, 1500);\n    if (fmt) fmt(max + 1, 1500);\n  }\n}\n\nfunction styleHeader_(sh, headers, widths, color) {\n  for (var c = 0; c < widths.length; c++) sh.setColumnWidth(c + 1, widths[c]);\n  sh.setFrozenRows(1);\n  sh.setRowHeight(1, 40);\n  sh.getRange(1, 1, 1, headers.length).setValues([headers])\n    .setFontWeight(\"bold\").setFontSize(11).setFontFamily(\"Segoe UI\")\n    .setBackground(color).setFontColor(\"#FFFFFF\")\n    .setHorizontalAlignment(\"center\").setVerticalAlignment(\"middle\").setWrap(true);\n  try { sh.setTabColor(color); } catch (e) {}\n}\n\nfunction fmtActivity_(sh, start, count) {\n  sh.getRange(start, 1, count, ACT_HEADERS.length).setFontFamily(\"Segoe UI\").setFontSize(10).setVerticalAlignment(\"middle\").setHorizontalAlignment(\"center\");\n  sh.getRange(start, 1, count, 1).setNumberFormat(\"dd-mmm-yyyy hh:mm AM/PM\");\n  sh.getRange(start, 19, count, 1).setNumberFormat(\"dd-mmm-yyyy hh:mm AM/PM\");\n  sh.getRange(start, 10, count, 1).setNumberFormat('0\"%\"');\n  sh.getRange(start, 11, count, 1).setNumberFormat(\"0\");\n  sh.getRange(start, 9, count, 1).setHorizontalAlignment(\"left\");\n  sh.getRange(start, 18, count, 1).setHorizontalAlignment(\"left\");\n}\nfunction getActivitySheet_(ss, force) {\n  ss = ss || getSS_();\n  var sh = ss.getSheetByName(ACT_SHEET), fresh = false;\n  if (!sh) { sh = ss.insertSheet(ACT_SHEET); fresh = true; }\n  if (fresh || force) {\n    var total = Math.max(sh.getMaxRows(), 3000);\n    if (sh.getMaxRows() < total) sh.insertRowsAfter(sh.getMaxRows(), total - sh.getMaxRows());\n    styleHeader_(sh, ACT_HEADERS, ACT_WIDTHS, \"#1E40AF\");\n    try {\n      sh.getRange(1, 12).setNote(\"Agency site: কতবার যেকোনো CTA/Call/WhatsApp/Messenger বাটনে ক্লিক হয়েছে\");\n      sh.getRange(1, 13).setNote(\"Agency site: ব্যবহার হয় না (সবসময় No) – পুরোনো কাঠামো ঠিক রাখতে রাখা\");\n      sh.getRange(1, 14).setNote(\"Agency site: Contact সেকশন/ফর্ম দেখেছে কিনা\");\n      sh.getRange(1, 16).setNote(\"Agency site: Contact form সফলভাবে জমা দিয়েছে কিনা (Lead)\");\n      sh.getRange(1, 17).setNote(\"Agency site: Lead ID\");\n    } catch (en) {}\n    fmtActivity_(sh, 2, sh.getMaxRows() - 1);\n    try {\n      var f = sh.getFilter(); if (f) f.remove();\n      sh.getRange(1, 1, sh.getMaxRows(), ACT_HEADERS.length).createFilter();\n      var rule = SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(\"Yes\").setBackground(\"#D1FAE5\").setFontColor(\"#065F46\")\n        .setRanges([sh.getRange(2, 13, sh.getMaxRows() - 1, 4)]).build();\n      sh.setConditionalFormatRules([rule]);\n    } catch (e) {}\n  }\n  return sh;\n}\n\nfunction fmtPixel_(sh, start, count) {\n  sh.getRange(start, 1, count, PIX_HEADERS.length).setFontFamily(\"Segoe UI\").setFontSize(10).setVerticalAlignment(\"middle\").setHorizontalAlignment(\"center\");\n  sh.getRange(start, 1, count, 1).setNumberFormat(\"dd-mmm-yyyy hh:mm AM/PM\");\n  sh.getRange(start, 4, count, 1).setNumberFormat('\"৳\"#,##0');\n}\nfunction getPixelSheet_(ss, force) {\n  ss = ss || getSS_();\n  var sh = ss.getSheetByName(PIX_SHEET), fresh = false;\n  if (!sh) { sh = ss.insertSheet(PIX_SHEET); fresh = true; }\n  if (fresh || force) {\n    var total = Math.max(sh.getMaxRows(), 5000);\n    if (sh.getMaxRows() < total) sh.insertRowsAfter(sh.getMaxRows(), total - sh.getMaxRows());\n    styleHeader_(sh, PIX_HEADERS, PIX_WIDTHS, \"#7C3AED\");\n    fmtPixel_(sh, 2, sh.getMaxRows() - 1);\n    try {\n      var f = sh.getFilter(); if (f) f.remove();\n      sh.getRange(1, 1, sh.getMaxRows(), PIX_HEADERS.length).createFilter();\n      var defs = [[\"Purchase\", \"#D1FAE5\", \"#065F46\"], [\"InitiateCheckout\", \"#FEF3C7\", \"#92400E\"], [\"AddToCart\", \"#DBEAFE\", \"#1E40AF\"]];\n      var rules = [];\n      for (var i = 0; i < defs.length; i++) rules.push(SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(defs[i][0]).setBackground(defs[i][1]).setFontColor(defs[i][2]).setRanges([sh.getRange(2, 3, sh.getMaxRows() - 1, 1)]).build());\n      sh.setConditionalFormatRules(rules);\n    } catch (e) {}\n  }\n  return sh;\n}\n\n/** Report ট্যাব: গত ১৪ দিনের ভিজিটর, অর্ডার, বিক্রি, কনভার্সন – সব ফর্মুলায় নিজে নিজে আপডেট হয় */\nfunction buildReport_(ss) {\n  var sh = ss.getSheetByName(REPORT_SHEET);\n  if (!sh) sh = ss.insertSheet(REPORT_SHEET);\n  sh.clear();\n  sh.setHiddenGridlines(true);\n  sh.setColumnWidths(1, 1, 24);\n  sh.setColumnWidths(2, 8, 125);\n  var L = \"'\" + LEADS_SHEET + \"'!\", A = \"'\" + ACT_SHEET + \"'!\", P = \"'\" + PIX_SHEET + \"'!\";\n\n  sh.getRange(\"B2\").setValue(\"📈 রিপোর্ট (গত ১৪ দিন)\").setFontSize(20).setFontWeight(\"bold\").setFontColor(\"#0F5132\");\n  sh.getRange(\"B3\").setValue(\"ভিজিটর = User Activity, Leads = Leads ট্যাব, Pixel Lead = Pixel Events ট্যাব\").setFontColor(\"#64748B\").setFontSize(10);\n\n  var heads = [\"তারিখ\", \"ভিজিটর\", \"Contact সেকশনে পৌঁছেছে\", \"Leads\", \"Won\", \"কনভার্সন %\", \"ফর্ম শুরু করেছে\", \"Pixel Lead\"];\n  sh.getRange(5, 2, 1, heads.length).setValues([heads]).setFontWeight(\"bold\").setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\").setWrap(true);\n  sh.setRowHeight(5, 38);\n  var rows = [];\n  for (var k = 0; k < 14; k++) {\n    var r = 6 + k, d = \"$B\" + r;\n    var act = A + \"$A$2:$A\", led = L + \"$B$2:$B\", pix = P + \"$A$2:$A\";\n    rows.push([\n      \"=TODAY()-\" + k,\n      \"=COUNTIFS(\" + act + \",\\\">=\\\"&\" + d + \",\" + act + \",\\\"<\\\"&\" + d + \"+1)\",\n      \"=COUNTIFS(\" + act + \",\\\">=\\\"&\" + d + \",\" + act + \",\\\"<\\\"&\" + d + \"+1,\" + A + \"$N$2:$N,\\\"Yes\\\")\",\n      \"=COUNTIFS(\" + led + \",\\\">=\\\"&\" + d + \",\" + led + \",\\\"<\\\"&\" + d + \"+1)\",\n      \"=COUNTIFS(\" + led + \",\\\">=\\\"&\" + d + \",\" + led + \",\\\"<\\\"&\" + d + \"+1,\" + L + \"$M$2:$M,\\\"Won\\\")\",\n      \"=IFERROR(E\" + r + \"/C\" + r + \",0)\",\n      \"=COUNTIFS(\" + act + \",\\\">=\\\"&\" + d + \",\" + act + \",\\\"<\\\"&\" + d + \"+1,\" + A + \"$O$2:$O,\\\"Yes\\\")\",\n      \"=COUNTIFS(\" + pix + \",\\\">=\\\"&\" + d + \",\" + pix + \",\\\"<\\\"&\" + d + \"+1,\" + P + \"$C$2:$C,\\\"Lead\\\")\"\n    ]);\n  }\n  sh.getRange(6, 2, 14, 8).setFormulas(rows).setHorizontalAlignment(\"center\");\n  sh.getRange(6, 2, 14, 1).setNumberFormat(\"dd-mmm-yyyy (ddd)\");\n  sh.getRange(6, 7, 14, 1).setNumberFormat(\"0.0%\");\n  sh.getRange(\"B20\").setValue(\"মোট\");\n  sh.getRange(\"C20:F20\").setFormulas([[\"=SUM(C6:C19)\", \"=SUM(D6:D19)\", \"=SUM(E6:E19)\", \"=SUM(F6:F19)\"]]);\n  sh.getRange(\"G20\").setFormula(\"=IFERROR(E20/C20,0)\");\n  sh.getRange(\"H20:I20\").setFormulas([[\"=SUM(H6:H19)\", \"=SUM(I6:I19)\"]]);\n  sh.getRange(\"B20:I20\").setFontWeight(\"bold\").setBackground(\"#E6F4EA\").setHorizontalAlignment(\"center\");\n  sh.getRange(\"G20\").setNumberFormat(\"0.0%\");\n  sh.getRange(\"B5:I20\").setBorder(true, true, true, true, true, true, \"#CBD5E1\", SpreadsheetApp.BorderStyle.SOLID);\n\n  sh.getRange(\"B23\").setValue(\"🌐 ভিজিটর সোর্স\").setFontWeight(\"bold\").setFontSize(13);\n  sh.getRange(\"B24\").setFormula(\"=IFERROR(QUERY(\" + A + \"A1:W,\\\"select C, count(B) where C <> '' group by C order by count(B) desc limit 10 label C 'সোর্স', count(B) 'ভিজিটর'\\\",1),\\\"এখনো কোনো ডাটা নেই\\\")\");\n  sh.getRange(\"E23\").setValue(\"📩 সোর্স অনুযায়ী Leads\").setFontWeight(\"bold\").setFontSize(13);\n  sh.getRange(\"E24\").setFormula(\"=IFERROR(QUERY(\" + L + \"A1:N,\\\"select L, count(A) where A <> '' group by L order by count(A) desc limit 10 label L 'সোর্স', count(A) 'Leads'\\\",1),\\\"এখনো কোনো Lead নেই\\\")\");\n  sh.getRange(\"I23\").setValue(\"📱 ডিভাইস\").setFontWeight(\"bold\").setFontSize(13);\n  sh.getRange(\"I24\").setFormula(\"=IFERROR(QUERY(\" + A + \"A1:W,\\\"select G, count(B) where G <> '' group by G order by count(B) desc label G 'ডিভাইস', count(B) 'ভিজিটর'\\\",1),\\\"এখনো কোনো ডাটা নেই\\\")\");\n  sh.getRange(\"B24:C24\").setFontWeight(\"bold\").setBackground(\"#1E40AF\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n  sh.getRange(\"E24:F24\").setFontWeight(\"bold\").setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n  sh.getRange(\"I24:J24\").setFontWeight(\"bold\").setBackground(\"#7C3AED\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n  try { sh.setTabColor(\"#059669\"); } catch (e) {}\n}\n\n\n/* =========================================================================\n   ৯. Dashboard ট্যাব (অটো হিসাব – অর্ডার আসার সাথে সাথে আপডেট)\n   ========================================================================= */\nfunction buildDashboard_(ss) {\n  var sh = ss.getSheetByName(DASH_SHEET);\n  if (!sh) sh = ss.insertSheet(DASH_SHEET);\n  sh.clear();\n  sh.setHiddenGridlines(true);\n  sh.setColumnWidths(1, 1, 24);\n  sh.setColumnWidths(2, 5, 170);\n  var L = \"'\" + LEADS_SHEET + \"'!\";\n\n  sh.getRange(\"B2\").setValue(\"📊 Leads ড্যাশবোর্ড\").setFontSize(20).setFontWeight(\"bold\").setFontColor(\"#0F5132\");\n  sh.getRange(\"B3\").setValue(\"এই পাতা নিজে থেকে আপডেট হয় – কিছু এডিট করার দরকার নেই\").setFontColor(\"#64748B\").setFontSize(10);\n  var cards = [\n    [\"মোট Leads\", \"=COUNTA(\" + L + \"A2:A)\", \"#EFF6FF\", \"#1E40AF\"],\n    [\"আজকের Leads\", \"=COUNTIFS(\" + L + \"B2:B,\\\">=\\\"&TODAY())\", \"#FEF3C7\", \"#92400E\"],\n    [\"নতুন (উত্তর বাকি)\", \"=COUNTIF(\" + L + \"M2:M,\\\"New\\\")\", \"#FEE2E2\", \"#991B1B\"],\n    [\"Won (কাজ পেয়েছি)\", \"=COUNTIF(\" + L + \"M2:M,\\\"Won\\\")\", \"#D1FAE5\", \"#065F46\"]\n  ];\n  for (var i = 0; i < cards.length; i++) {\n    sh.getRange(5, 2 + i).setValue(cards[i][0]).setFontSize(10).setFontColor(cards[i][3]).setBackground(cards[i][2]).setHorizontalAlignment(\"center\").setWrap(true);\n    sh.getRange(6, 2 + i).setFormula(cards[i][1]).setFontSize(22).setFontWeight(\"bold\").setFontColor(cards[i][3]).setBackground(cards[i][2]).setHorizontalAlignment(\"center\").setNumberFormat(\"0\");\n  }\n  sh.setRowHeight(5, 34); sh.setRowHeight(6, 56);\n  sh.getRange(\"B9\").setValue(\"📦 Lead স্ট্যাটাস\").setFontWeight(\"bold\").setFontSize(13);\n  sh.getRange(\"B10:C10\").setValues([[\"স্ট্যাটাস\", \"সংখ্যা\"]]).setFontWeight(\"bold\").setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n  for (var s = 0; s < LEAD_STATUSES.length; s++) {\n    sh.getRange(11 + s, 2).setValue(LEAD_STATUSES[s]);\n    sh.getRange(11 + s, 3).setFormula(\"=COUNTIF(\" + L + \"M2:M,\\\"\" + LEAD_STATUSES[s] + \"\\\")\").setHorizontalAlignment(\"center\").setFontWeight(\"bold\");\n  }\n  sh.getRange(\"B11:C14\").setBorder(true, true, true, true, true, true, \"#CBD5E1\", SpreadsheetApp.BorderStyle.SOLID);\n  sh.getRange(\"E9\").setValue(\"🎯 শীর্ষ সার্ভিস আগ্রহ\").setFontWeight(\"bold\").setFontSize(13);\n  sh.getRange(\"E10\").setFormula(\"=IFERROR(QUERY(\" + L + \"G1:G,\\\"select G, count(G) where G <> '' group by G order by count(G) desc limit 8 label G 'সার্ভিস', count(G) 'Leads'\\\",1),\\\"এখনো কোনো Lead নেই\\\")\");\n  sh.getRange(\"E10:F10\").setFontWeight(\"bold\").setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n  sh.getRange(\"B23\").setValue(\"🕒 সর্বশেষ ৫টি Lead\").setFontWeight(\"bold\").setFontSize(13);\n  sh.getRange(\"B24\").setFormula(\"=IFERROR(QUERY(\" + L + \"A1:N,\\\"select A, C, G, H, M where A <> '' order by B desc limit 5 label A 'Lead ID', C 'নাম', G 'সার্ভিস', H 'বাজেট', M 'স্ট্যাটাস'\\\",1),\\\"এখনো কোনো Lead নেই\\\")\");\n  sh.getRange(\"B24:F24\").setFontWeight(\"bold\").setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n  try { sh.setTabColor(\"#E3A62A\"); } catch (e) {}\n}\n\n\n/* =========================================================================\n   ১০. সাহায্যকারী\n   ========================================================================= */\nfunction json_(obj) {\n  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);\n}\n\n/* =========================================================================\n   Leads (Contact form) – সেভ করা, ভ্যালিডেশন, স্প্যাম প্রটেকশন\n   ========================================================================= */\nfunction stripTags_(v) { return String(v == null ? \"\" : v).replace(/[<>]/g, \"\"); }\nfunction cl_(v, n) { return clean_(stripTags_(v), n); }\n\nfunction getLeadsSheet_(ss, force) {\n  ss = ss || getSS_();\n  var sh = ss.getSheetByName(LEADS_SHEET), fresh = false;\n  if (!sh) { sh = ss.insertSheet(LEADS_SHEET); fresh = true; }\n  if (fresh || force) {\n    var total = Math.max(sh.getMaxRows(), 3000);\n    if (sh.getMaxRows() < total) sh.insertRowsAfter(sh.getMaxRows(), total - sh.getMaxRows());\n    styleHeader_(sh, LEAD_HEADERS, LEAD_WIDTHS, \"#0F5132\");\n    fmtLeads_(sh, 2, sh.getMaxRows() - 1);\n    try {\n      var f = sh.getFilter(); if (f) f.remove();\n      sh.getRange(1, 1, sh.getMaxRows(), LEAD_HEADERS.length).createFilter();\n      var defs = [[\"New\", \"#FEF3C7\", \"#92400E\"], [\"Contacted\", \"#DBEAFE\", \"#1E40AF\"], [\"Won\", \"#D1FAE5\", \"#065F46\"], [\"Lost\", \"#FEE2E2\", \"#991B1B\"]], rules = [];\n      for (var i = 0; i < defs.length; i++) rules.push(SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(defs[i][0]).setBackground(defs[i][1]).setFontColor(defs[i][2]).setRanges([sh.getRange(2, LEAD_STATUS_COL, sh.getMaxRows() - 1, 1)]).build());\n      sh.setConditionalFormatRules(rules);\n    } catch (e) {}\n  }\n  return sh;\n}\nfunction fmtLeads_(sh, start, count) {\n  sh.getRange(start, 1, count, LEAD_HEADERS.length).setFontFamily(\"Segoe UI\").setFontSize(10).setVerticalAlignment(\"middle\");\n  sh.getRange(start, 1, count, 1).setFontWeight(\"bold\").setHorizontalAlignment(\"center\");\n  sh.getRange(start, 2, count, 1).setNumberFormat(\"dd-mmm-yyyy hh:mm AM/PM\").setHorizontalAlignment(\"center\");\n  sh.getRange(start, 4, count, 1).setNumberFormat(\"@\").setHorizontalAlignment(\"center\");\n  sh.getRange(start, 9, count, 1).setWrap(true);\n  sh.getRange(start, 14, count, 1).setWrap(true);\n  sh.getRange(start, LEAD_STATUS_COL, count, 1).setHorizontalAlignment(\"center\").setFontWeight(\"bold\")\n    .setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(LEAD_STATUSES, true).setAllowInvalid(false).build());\n}\nfunction nextLeadId_() {\n  var day = Utilities.formatDate(new Date(), TIMEZONE, \"yyMMdd\"), props = PropertiesService.getScriptProperties(), key = \"lseq_\" + day;\n  var n = parseInt(props.getProperty(key) || \"0\", 10) + 1; props.setProperty(key, String(n));\n  return \"LD-\" + day + \"-\" + (\"000\" + n).slice(-4);\n}\nfunction validPhone_(p) { return /^01[3-9]\\d{8}$/.test(p) || /^\\+\\d{8,15}$/.test(p); }\n\nfunction handleLead_(d) {\n  var cache = CacheService.getScriptCache();\n  try {\n    if (!d || typeof d !== \"object\") return json_({ success: false, error: \"Invalid request.\" });\n    if (d.website) return json_({ success: false, error: \"We could not accept this submission.\" });        // honeypot (no fake success)\n    var name = cl_(d.name, 80), phone = normPhone_(d.phone), email = cl_(d.email, 120), msg = cl_(d.message, 1500);\n    if (name.length < 2) return json_({ success: false, error: \"Please enter your name.\" });\n    if (!validPhone_(phone) && !/^\\+\\d{8,15}$/.test(String(d.phone || \"\").replace(/[\\s\\-()]/g, \"\"))) return json_({ success: false, error: \"Please enter a valid phone number (e.g. 01712345678).\" });\n    if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(email)) return json_({ success: false, error: \"Please enter a valid email or leave it empty.\" });\n    if (msg.length < 10) return json_({ success: false, error: \"Please write at least 10 characters about your project.\" });\n\n    var reqId = String(d.reqId || \"\").replace(/[^A-Za-z0-9_-]/g, \"\").slice(0, 40);\n    if (reqId) { var done = cache.get(\"lreq_\" + reqId); if (done) return ContentService.createTextOutput(done).setMimeType(ContentService.MimeType.JSON); }\n\n    var minutes = Math.max(1, Number(getLiveConfig_().formCooldown) || 2);\n    var keyP = \"lead_guard_\" + phone, keyE = email ? \"lead_guard_\" + email.toLowerCase() : \"\";\n    var hit = cache.get(keyP) || (keyE && cache.get(keyE));\n    if (hit) return json_({ success: false, cooldown: true, error: \"We already received a request from you a moment ago (ID \" + hit + \"). Please wait about \" + minutes + \" minutes before sending another, or call us for urgent changes.\" });\n\n    var lock = LockService.getScriptLock();\n    if (!lock.tryLock(25000)) return json_({ success: false, busy: true, error: \"Server is busy, please retry in a few seconds.\" });\n    try {\n      if (reqId) { var done2 = cache.get(\"lreq_\" + reqId); if (done2) return ContentService.createTextOutput(done2).setMimeType(ContentService.MimeType.JSON); }\n      var hit2 = cache.get(keyP) || (keyE && cache.get(keyE));\n      if (hit2) return json_({ success: false, cooldown: true, error: \"We already received a request from you a moment ago (ID \" + hit2 + \").\" });\n      var ss = getSS_(), sh = getLeadsSheet_(ss, false);\n      var leadId = nextLeadId_(), row = sh.getLastRow() + 1;\n      ensureRows_(sh, row, function (start, cnt) { fmtLeads_(sh, start, cnt); });\n      var vals = [leadId, new Date(), name, phone, email, cl_(d.company, 100), cl_(d.interest, 80), cl_(d.budget, 60), msg, cl_(d[\"package\"], 60), cl_(d.page, 80), cl_(d.source || \"direct\", 80), \"New\", \"\"];\n      sh.getRange(row, 4).setNumberFormat(\"@\");\n      sh.getRange(row, 1, 1, LEAD_HEADERS.length).setValues([vals]);\n      var result = { success: true, leadId: leadId };\n      try { cache.put(keyP, leadId, minutes * 60); if (keyE) cache.put(keyE, leadId, minutes * 60); if (reqId) cache.put(\"lreq_\" + reqId, JSON.stringify(result), 600); } catch (c) {}\n      return json_(result);\n    } finally { try { lock.releaseLock(); } catch (x) {} }\n  } catch (err) {\n    return json_({ success: false, error: \"Server error, please try again or call us.\" });\n  }\n}\n\n\n/* =========================================================================\n   অ্যাডমিন: লগইন (সার্ভারে যাচাই), কনটেন্ট প্রকাশ, ছবি আপলোড, Leads, Analytics\n   ========================================================================= */\nfunction sha256Hex_(str) {\n  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, str, Utilities.Charset.UTF_8), out = \"\";\n  for (var i = 0; i < bytes.length; i++) { var b = (bytes[i] + 256) % 256; out += (\"0\" + b.toString(16)).slice(-2); }\n  return out;\n}\nfunction safeEq_(a, b) { a = String(a); b = String(b); if (a.length !== b.length) return false; var r = 0; for (var i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; }\n\nfunction adminLogin_(password) {\n  if (!ADMIN_HASH || !ADMIN_SALT) return json_({ success: false, error: \"Admin password is not set in Code.gs. Generate Code.gs from admin.html ➔ Setup.\" });\n  var cache = CacheService.getScriptCache();\n  var fails = parseInt(cache.get(\"adm_fail\") || \"0\", 10);\n  if (fails >= 6) return json_({ success: false, locked: true, error: \"Too many wrong attempts. Try again in 15 minutes.\" });\n  if (!safeEq_(sha256Hex_(ADMIN_SALT + \":\" + String(password || \"\")), ADMIN_HASH)) {\n    cache.put(\"adm_fail\", String(fails + 1), 900);\n    return json_({ success: false, error: \"Wrong password.\" });\n  }\n  cache.remove(\"adm_fail\");\n  var token = Utilities.getUuid().replace(/-/g, \"\") + Utilities.getUuid().replace(/-/g, \"\");\n  cache.put(\"adm_\" + token, \"1\", 21600);\n  return json_({ success: true, token: token });\n}\nfunction checkToken_(t) { return !!t && String(t).length >= 40 && CacheService.getScriptCache().get(\"adm_\" + t) === \"1\"; }\n\nfunction handleAdmin_(d) {\n  try {\n    if (d.action === \"login\") return adminLogin_(d.password);\n    if (!checkToken_(d.token)) return json_({ success: false, auth: false, error: \"Session expired. Please log in again.\" });\n    switch (d.action) {\n      case \"ping\": return json_({ success: true });\n      case \"logout\": CacheService.getScriptCache().remove(\"adm_\" + d.token); return json_({ success: true });\n      case \"getConfig\": var pub = getPublicConfig_(); return json_({ success: true, rev: pub.rev, settings: pub.settings, sheetUrl: getSS_().getUrl() });\n      case \"saveConfig\":\n        if (!d.settings || typeof d.settings !== \"object\" || Array.isArray(d.settings)) return json_({ success: false, error: \"Invalid settings.\" });\n        if (JSON.stringify(d.settings).length > 380000) return json_({ success: false, error: \"Settings too large.\" });\n        return json_({ success: true, rev: saveSettings_(d.settings) });\n      case \"uploadImage\": return uploadImage_(d);\n      case \"listLeads\": return json_({ success: true, leads: listLeads_(parseInt(d.limit, 10) || 300) });\n      case \"setLeadStatus\": return setLeadField_(d.leadId, \"status\", d.status);\n      case \"setLeadNote\": return setLeadField_(d.leadId, \"note\", d.note);\n      case \"analytics\": return json_({ success: true, data: analytics_(parseInt(d.days, 10) || 30) });\n      default: return json_({ success: false, error: \"Unknown action.\" });\n    }\n  } catch (err) { return json_({ success: false, error: \"Server error: \" + err.message }); }\n}\n\n/* ---------- Settings (প্রকাশিত কনটেন্ট) ---------- */\nfunction getSettingsSheet_(ss) {\n  ss = ss || getSS_();\n  var sh = ss.getSheetByName(SETTINGS_SHEET);\n  if (!sh) {\n    sh = ss.insertSheet(SETTINGS_SHEET);\n    sh.getRange(1, 1, 1, 3).setValues([[\"Key\", \"Value\", \"Note\"]]).setFontWeight(\"bold\").setBackground(\"#0F5132\").setFontColor(\"#FFFFFF\").setHorizontalAlignment(\"center\");\n    sh.setColumnWidth(1, 180); sh.setColumnWidth(2, 420); sh.setColumnWidth(3, 320); sh.setFrozenRows(1);\n    sh.getRange(2, 1, 4, 3).setValues([[\"site_rev\", \"0\", \"প্রতিবার Publish করলে নম্বর বদলায়\"], [\"site_updated\", \"\", \"সর্বশেষ প্রকাশের সময়\"], [\"site_chunks\", \"1\", \"কনফিগ কয়টি অংশে সংরক্ষিত\"], [\"site_config_0\", \"{}\", \"⚠️ হাতে এডিট করবেন না – Admin Panel ব্যবহার করুন\"]]);\n    try { sh.setTabColor(\"#64748B\"); } catch (e) {}\n  }\n  return sh;\n}\nfunction readSettingsRaw_() {\n  var sh = getSettingsSheet_(), last = Math.max(2, sh.getLastRow()), vals = sh.getRange(1, 1, last, 2).getValues(), map = {};\n  for (var i = 1; i < vals.length; i++) if (vals[i][0]) map[String(vals[i][0])] = String(vals[i][1]);\n  var chunks = parseInt(map[\"site_chunks\"] || \"1\", 10) || 1, json = \"\";\n  for (var c = 0; c < chunks; c++) json += (map[\"site_config_\" + c] || \"\");\n  var obj = {}; try { obj = json ? JSON.parse(json) : {}; } catch (e) { obj = {}; }\n  return { settings: obj, rev: map[\"site_rev\"] || \"0\" };\n}\nfunction getPublicConfig_() {\n  var cache = CacheService.getScriptCache(), hit = cache.get(\"pub_cfg\");\n  if (hit) { try { return JSON.parse(hit); } catch (e) {} }\n  var raw = readSettingsRaw_(), out = { settings: raw.settings, rev: raw.rev };\n  try { var t = JSON.stringify(out); if (t.length < 95000) cache.put(\"pub_cfg\", t, 300); } catch (e2) {}\n  return out;\n}\nfunction saveSettings_(settings) {\n  var lock = LockService.getScriptLock(); lock.waitLock(20000);\n  try {\n    var sh = getSettingsSheet_(), json = JSON.stringify(settings), parts = [];\n    for (var p = 0; p < json.length; p += CFG_CHUNK) parts.push(json.substring(p, p + CFG_CHUNK));\n    if (!parts.length) parts.push(\"{}\");\n    var rev = String(new Date().getTime());\n    var rows = [[\"site_rev\", rev, \"প্রতিবার Publish করলে নম্বর বদলায়\"], [\"site_updated\", Utilities.formatDate(new Date(), TIMEZONE, \"dd-MMM-yyyy hh:mm a\"), \"সর্বশেষ প্রকাশের সময়\"], [\"site_chunks\", String(parts.length), \"কনফিগ কয়টি অংশে সংরক্ষিত\"]];\n    for (var i = 0; i < parts.length; i++) rows.push([\"site_config_\" + i, parts[i], \"⚠️ হাতে এডিট করবেন না – Admin Panel ব্যবহার করুন\"]);\n    sh.getRange(2, 1, Math.max(rows.length, sh.getLastRow() - 1), 3).clearContent();\n    sh.getRange(2, 1, rows.length, 3).setValues(rows);\n    CacheService.getScriptCache().remove(\"pub_cfg\");\n    return rev;\n  } finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\n/* ---------- ছবি আপলোড → Google Drive (সবার জন্য দেখার লিংক) ---------- */\nfunction uploadImage_(d) {\n  var mime = String(d.mime || \"\"), okTypes = { \"image/jpeg\": \"jpg\", \"image/png\": \"png\", \"image/webp\": \"webp\" };\n  if (!okTypes[mime]) return json_({ success: false, error: \"Only JPG, PNG or WebP images are allowed.\" });\n  var b64 = String(d.data || \"\");\n  if (!b64 || b64.length > 2300000) return json_({ success: false, error: \"Image is too large (max about 1.6 MB after compression).\" });\n  var base = String(d.name || \"image\").toLowerCase().replace(/\\.[a-z0-9]+$/, \"\").replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\").slice(0, 40) || \"image\";\n  var fname = base + \"-\" + new Date().getTime().toString(36) + \".\" + okTypes[mime];\n  var blob = Utilities.newBlob(Utilities.base64Decode(b64), mime, fname);\n  var props = PropertiesService.getScriptProperties(), folder = null, fid = props.getProperty(\"drive_folder\");\n  if (fid) { try { folder = DriveApp.getFolderById(fid); } catch (e) { folder = null; } }\n  if (!folder) { var it = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME); folder = it.hasNext() ? it.next() : DriveApp.createFolder(DRIVE_FOLDER_NAME); props.setProperty(\"drive_folder\", folder.getId()); }\n  var file = folder.createFile(blob);\n  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);\n  return json_({ success: true, url: \"https://lh3.googleusercontent.com/d/\" + file.getId(), id: file.getId() });\n}\n\n/* ---------- Leads তালিকা ও আপডেট ---------- */\nfunction listLeads_(limit) {\n  var sh = getLeadsSheet_(getSS_(), false), last = sh.getLastRow();\n  if (last < 2) return [];\n  limit = Math.min(Math.max(limit, 1), 1000);\n  var start = Math.max(2, last - limit + 1), vals = sh.getRange(start, 1, last - start + 1, LEAD_HEADERS.length).getValues(), out = [];\n  for (var i = vals.length - 1; i >= 0; i--) {\n    var r = vals[i]; if (!r[0]) continue;\n    out.push({ id: r[0], date: r[1] instanceof Date ? Utilities.formatDate(r[1], TIMEZONE, \"dd-MMM-yyyy hh:mm a\") : String(r[1]), name: r[2], phone: String(r[3]), email: r[4], company: r[5], interest: r[6], budget: r[7], message: r[8], pkg: r[9], page: r[10], source: r[11], status: r[12] || \"New\", note: r[13] || \"\" });\n  }\n  return out;\n}\nfunction setLeadField_(leadId, field, value) {\n  var sh = getLeadsSheet_(getSS_(), false), last = sh.getLastRow();\n  if (field === \"status\" && LEAD_STATUSES.indexOf(value) < 0) return json_({ success: false, error: \"Invalid status.\" });\n  if (last < 2) return json_({ success: false, error: \"Lead not found.\" });\n  var lock = LockService.getScriptLock(); lock.waitLock(20000);\n  try {\n    var ids = sh.getRange(2, 1, last - 1, 1).getValues();\n    for (var i = ids.length - 1; i >= 0; i--) {\n      if (String(ids[i][0]) === String(leadId)) {\n        sh.getRange(i + 2, field === \"status\" ? LEAD_STATUS_COL : 14).setValue(field === \"status\" ? value : cl_(value, 500));\n        return json_({ success: true });\n      }\n    }\n  } finally { try { lock.releaseLock(); } catch (x) {} }\n  return json_({ success: false, error: \"Lead not found.\" });\n}\n\n/* ---------- Analytics (User Activity + Leads থেকে) ---------- */\nfunction analytics_(days) {\n  days = Math.min(Math.max(days, 1), 90);\n  var ss = getSS_(), tz = TIMEZONE, now = new Date().getTime(), cutoff = now - days * 86400000;\n  var act = getActivitySheet_(ss, false), n = act.getLastRow();\n  var rows = n > 1 ? act.getRange(2, 1, n - 1, ACT_HEADERS.length).getValues() : [];\n  var daily = {}, src = {}, dev = {}, inter = {};\n  var t = { visits: 0, secs: 0, scroll: 0, cta: 0, contact: 0, form: 0, leads: 0 }, buckets = [0, 0, 0, 0];\n  for (var d0 = days - 1; d0 >= 0; d0--) { var key = Utilities.formatDate(new Date(now - d0 * 86400000), tz, \"yyyy-MM-dd\"); daily[key] = { visits: 0, leads: 0 }; }\n  rows.forEach(function (r) {\n    if (!(r[0] instanceof Date) || r[0].getTime() < cutoff) return;\n    t.visits++; t.secs += Number(r[10]) || 0; var sc = Number(r[9]) || 0; t.scroll += sc; t.cta += Number(r[11]) || 0;\n    if (r[13] === \"Yes\") t.contact++; if (r[14] === \"Yes\") t.form++; if (r[15] === \"Yes\") t.leads++;\n    buckets[sc < 25 ? 0 : sc < 50 ? 1 : sc < 75 ? 2 : 3]++;\n    var k = Utilities.formatDate(r[0], tz, \"yyyy-MM-dd\"); if (daily[k]) daily[k].visits++;\n    var s = String(r[2] || \"direct\"); src[s] = (src[s] || 0) + 1;\n    var dv = String(r[6] || \"Unknown\"); dev[dv] = (dev[dv] || 0) + 1;\n  });\n  var ls = getLeadsSheet_(ss, false), ln = ls.getLastRow(), leads = ln > 1 ? ls.getRange(2, 1, ln - 1, LEAD_HEADERS.length).getValues() : [], status = { New: 0, Contacted: 0, Won: 0, Lost: 0 }, leadCount = 0;\n  leads.forEach(function (r) {\n    if (!r[0] || !(r[1] instanceof Date) || r[1].getTime() < cutoff) return;\n    leadCount++; status[r[12] || \"New\"] = (status[r[12] || \"New\"] || 0) + 1;\n    var k = Utilities.formatDate(r[1], tz, \"yyyy-MM-dd\"); if (daily[k]) daily[k].leads++;\n    var it = String(r[6] || \"Not specified\"); inter[it] = (inter[it] || 0) + 1;\n  });\n  function top(o, m) { return Object.keys(o).map(function (k) { return [k, o[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, m || 8); }\n  var v = t.visits;\n  return {\n    days: days, visits: v, avgSecs: v ? Math.round(t.secs / v) : 0, avgScroll: v ? Math.round(t.scroll / v) : 0, ctaClicks: t.cta,\n    funnel: { visits: v, contact: t.contact, formStart: t.form, leads: leadCount },\n    conversion: v ? Math.round(leadCount / v * 1000) / 10 : 0,\n    scrollBuckets: { \"0-25%\": buckets[0], \"25-50%\": buckets[1], \"50-75%\": buckets[2], \"75-100%\": buckets[3] },\n    topSources: top(src), devices: top(dev), interests: top(inter), status: status,\n    daily: Object.keys(daily).map(function (k) { return { d: k, visits: daily[k].visits, leads: daily[k].leads }; })\n  };\n}\n\n\n/** টেস্ট: Apps Script থেকে ▶ Run করে একটি টেস্ট অর্ডার দিন */\nfunction testOrder() {\n  var res = doPost({\n    postData: { contents: JSON.stringify({\n      name: \"টেস্ট কাস্টমার\", phone: \"01700000000\", district: \"ঢাকা\",\n      address: \"মিরপুর-১০, ঢাকা\", note: \"এটি একটি টেস্ট অর্ডার\", shippingId: \"dhaka\",\n      items: [{ id: \"m1000\", qty: 1 }, { id: \"hn1000\", qty: 1 }]\n    }) }\n  });\n  Logger.log(\"টেস্ট রেসপন্স: \" + res.getContent());\n}\n\n/** টেস্ট: ভিজিটর অ্যাক্টিভিটি ও Pixel ইভেন্ট শিটে যাচ্ছে কিনা দেখতে ▶ Run করুন */\nfunction testTrack() {\n  var res = doPost({\n    postData: { contents: JSON.stringify({\n      action: \"track\", sid: \"TEST\" + new Date().getTime(),\n      a: { src: \"facebook\", med: \"cpc\", camp: \"test\", ref: \"\", dev: \"Mobile\", scr: \"390x844\", land: \"/\", scroll: 80, secs: 42, cta: 2, vs: 1, chk: 1, form: 1, ord: 0, oid: \"\" },\n      ev: [{ n: \"PageView\", v: 0, c: \"\", o: \"\" }, { n: \"ViewContent\", v: 1050, c: \"m1000\", o: \"\" }, { n: \"InitiateCheckout\", v: 1050, c: \"\", o: \"\" }]\n    }) }\n  });\n  Logger.log(\"ট্র্যাকিং রেসপন্স: \" + res.getContent());\n}\n\n/** টেস্ট: Leads শিটে একটি টেস্ট Lead যাচ্ছে কিনা দেখতে ▶ Run করুন */\nfunction testLead() {\n  var res = doPost({ postData: { contents: JSON.stringify({ action: \"lead\", name: \"Test Lead\", phone: \"01700000001\", email: \"test@example.com\", company: \"Test Co\", interest: \"Website / Landing page\", budget: \"৳25,000 – ৳60,000\", message: \"This is a test lead from Apps Script.\", page: \"/contact\", source: \"test\", sid: \"TEST\", reqId: \"TEST\" + new Date().getTime() }) } });\n  Logger.log(\"Lead রেসপন্স: \" + res.getContent());\n}\n";
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  /* ---------- helpers ---------- */
+  function isObj(x) { return x && typeof x === "object" && !Array.isArray(x); }
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function merge(a, b) {
+    var out = Array.isArray(a) ? a.slice() : {}, k;
+    if (isObj(a)) for (k in a) out[k] = isObj(a[k]) ? merge(a[k], {}) : (Array.isArray(a[k]) ? a[k].slice() : a[k]);
+    if (isObj(b)) for (k in b) { if (b[k] === undefined || b[k] === null) continue; out[k] = (isObj(b[k]) && isObj(out[k])) ? merge(out[k], b[k]) : b[k]; }
+    return out;
+  }
+  function get(o, p) { return p.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, o); }
+  function set(o, p, v) { var ks = p.split("."), last = ks.pop(), t = o; ks.forEach(function (k) { if (t[k] === null || typeof t[k] !== "object") t[k] = {}; t = t[k]; }); t[last] = v; }
+  function h(tag, a) {
+    var e = document.createElement(tag); a = a || {};
+    for (var k in a) {
+      var v = a[k];
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v;
+      else if (k.slice(0, 2) === "on") e[k] = v;
+      else if (v === true) e.setAttribute(k, "");
+      else e.setAttribute(k, v);
+    }
+    for (var i = 2; i < arguments.length; i++) add(e, arguments[i]);
+    return e;
+  }
+  function add(e, c) {
+    if (c == null || c === false) return;
+    if (Array.isArray(c)) { c.forEach(function (x) { add(e, x); }); return; }
+    e.appendChild(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  function bn(n) { return String(n).replace(/\d/g, function (d) { return "০১২৩৪৫৬৭৮৯"[d]; }); }
+  function toast(msg, type) {
+    var t = $("#toast"); t.textContent = msg; t.className = "toast show " + (type || "");
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = "toast"; }, 3200);
+  }
+
+  /* ---------- হেল্পার: SHA-256, ZIP ---------- */
+  function sha256(str) {
+    var K = [], P = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311];
+    for (var i = 0; i < 64; i++) K[i] = Math.floor((Math.pow(P[i], 1 / 3) % 1) * 4294967296) | 0;
+    var Hh = [2, 3, 5, 7, 11, 13, 17, 19].map(function (p) { return Math.floor((Math.sqrt(p) % 1) * 4294967296) | 0; });
+    var bytes = new TextEncoder().encode(str), l = bytes.length, n = ((l + 9 + 63) >> 6) << 6, m = new Uint8Array(n);
+    m.set(bytes); m[l] = 0x80;
+    var dv = new DataView(m.buffer); dv.setUint32(n - 4, l * 8, false); dv.setUint32(n - 8, Math.floor(l * 8 / 4294967296), false);
+    var rr = function (x, c) { return (x >>> c) | (x << (32 - c)); };
+    for (var o = 0; o < n; o += 64) {
+      var w = new Array(64);
+      for (i = 0; i < 16; i++) w[i] = dv.getInt32(o + i * 4, false);
+      for (i = 16; i < 64; i++) {
+        var s0 = rr(w[i - 15], 7) ^ rr(w[i - 15], 18) ^ (w[i - 15] >>> 3), s1 = rr(w[i - 2], 17) ^ rr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      var a = Hh[0], b = Hh[1], c = Hh[2], d = Hh[3], e = Hh[4], f = Hh[5], g = Hh[6], hh = Hh[7];
+      for (i = 0; i < 64; i++) {
+        var t1 = (hh + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+        var t2 = ((rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+        hh = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      Hh[0] = (Hh[0] + a) | 0; Hh[1] = (Hh[1] + b) | 0; Hh[2] = (Hh[2] + c) | 0; Hh[3] = (Hh[3] + d) | 0;
+      Hh[4] = (Hh[4] + e) | 0; Hh[5] = (Hh[5] + f) | 0; Hh[6] = (Hh[6] + g) | 0; Hh[7] = (Hh[7] + hh) | 0;
+    }
+    return Hh.map(function (x) { return ("00000000" + (x >>> 0).toString(16)).slice(-8); }).join("");
+  }
+  var CRC = (function () { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(u) { var c = 0xFFFFFFFF; for (var i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function makeZip(files) {           // files: [{name, data:Uint8Array}] – স্টোর মেথড (ছবি আগেই কম্প্রেসড)
+    var enc = new TextEncoder(), parts = [], cd = [], off = 0, now = new Date();
+    var dt = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate(), tm = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+    files.forEach(function (f) {
+      var nm = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+      var lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, tm, true); lh.setUint16(12, dt, true); lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), nm, f.data);
+      var ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, tm, true); ch.setUint16(14, dt, true); ch.setUint32(16, crc, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+      cd.push(new Uint8Array(ch.buffer), nm);
+      off += 30 + nm.length + sz;
+    });
+    var cdSize = cd.reduce(function (a, p) { return a + p.length; }, 0);
+    var end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cdSize, true); end.setUint32(16, off, true);
+    return new Blob(parts.concat(cd, [new Uint8Array(end.buffer)]), { type: "application/zip" });
+  }
+
+  /* ---------- state ---------- */
+  var API = DEF.apiEndpoint || "";
+  var DKEY = "hn_site_draft";
+  var cfg = null, page = "overview", token = "", pending = {}, isDirty = false, published = "", serverMode = false, sheetUrl = "";
+  try { token = sessionStorage.getItem("hn_adm_tok") || ""; } catch (e) {}
+
+  function payload() { var o = clone(cfg); return o; }
+  function pubPayload() { var o = payload(); delete o.apiEndpoint; return o; }
+  var dt;
+  function status() {
+    var n = Object.keys(pending).length;
+    var el = $("#dirtyTxt");
+    if (!el) return;
+    el.textContent = isDirty ? "⚠️ প্রকাশ করা হয়নি" + (n ? " · 📷 " + bn(n) + "টি নতুন ছবি" : "") : (serverMode ? "✅ সব পরিবর্তন প্রকাশিত" : "কোনো পরিবর্তন নেই");
+    $("#pubBtn").classList.toggle("dirty", isDirty);
+  }
+  function dirty() {
+    isDirty = true; status();
+    clearTimeout(dt);
+    dt = setTimeout(function () { try { localStorage.setItem(DKEY, JSON.stringify({ data: payload() })); } catch (e) {} }, 250);
+  }
+  window.addEventListener("beforeunload", function (e) { if (isDirty) { e.preventDefault(); e.returnValue = ""; } });
+
+  /* ---------- API (server checks the login on every call) ---------- */
+  function api(action, extra) {
+    if (!API) return Promise.reject(new Error("API লিংক সেট করা নেই (Setup পেজ দেখুন)।"));
+    return fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(Object.assign({ action: action, token: token }, extra || {})) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d && d.auth === false) { doLogout(true); throw new Error(d.error); } return d; });
+  }
+
+  /* ---------- images: compress, then upload to Drive (server mode) or add to the update zip ---------- */
+  function pickImage(folder, cb) {
+    var f = h("input", { type: "file", accept: "image/jpeg,image/png,image/webp" });
+    f.onchange = function () {
+      var file = f.files[0]; if (!file) return;
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var max = 1600, sc = Math.min(1, max / Math.max(img.width, img.height));
+        var cv = document.createElement("canvas"); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+        var cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        cv.toBlob(function (b) {
+          var base = file.name.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "img";
+          if (serverMode) {
+            toast("ছবি আপলোড হচ্ছে…");
+            var rd = new FileReader();
+            rd.onload = function () {
+              api("uploadImage", { name: base, mime: "image/jpeg", data: String(rd.result).split(",")[1] }).then(function (r) {
+                if (!r.success) throw new Error(r.error);
+                toast("✅ ছবি আপলোড হয়েছে (" + Math.round(b.size / 1024) + " KB)", "ok"); cb(r.url, r.url);
+              }).catch(function (e) { toast(e.message || "আপলোড হয়নি", "bad"); });
+            };
+            rd.readAsDataURL(b);
+          } else {
+            var path = "assets/images/" + folder + "/" + base + "-" + Date.now().toString(36) + ".jpg", purl = URL.createObjectURL(b);
+            pending[path] = { blob: b, url: purl }; toast("ছবি যোগ হয়েছে (" + Math.round(b.size / 1024) + " KB) – ডাউনলোড zip এ যাবে", "ok"); status(); cb(path, purl);
+          }
+        }, "image/jpeg", 0.84);
+      };
+      img.onerror = function () { toast("ছবিটি পড়া যায়নি", "bad"); };
+      img.src = url;
+    };
+    f.click();
+  }
+
+  /* ---------- reusable form pieces ---------- */
+  function sw(checked, fn, label) {
+    var i = h("input", { type: "checkbox" }); i.checked = !!checked; i.onchange = function () { fn(i.checked); };
+    return h("label", { class: "sw" }, i, h("span", { class: "sw-t" }), label ? h("span", { class: "sw-l" }, label) : null);
+  }
+  function onoff(label, path, def) {
+    var cur = get(cfg, path), on = cur == null ? def : !!cur, pill = h("span", { class: "pill" });
+    function paint() { pill.className = "pill " + (on ? "on" : "off"); pill.textContent = on ? "✅ চালু (ON)" : "⛔ বন্ধ (OFF)"; }
+    paint();
+    return h("div", { class: "onoff" }, sw(on, function (v) { on = v; set(cfg, path, v); dirty(); paint(); }), h("span", { class: "ol" }, label), pill);
+  }
+  function mv(a, i, d) { var j = i + d; if (j < 0 || j >= a.length) return false; var t = a[i]; a[i] = a[j]; a[j] = t; return true; }
+  function uid() { return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+  function slugify(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50); }
+  function thumb(src) {
+    var im = h("img", { class: "th", alt: "", loading: "lazy" });
+    im.onerror = function () { im.classList.add("bad"); }; im.onload = function () { im.classList.remove("bad"); };
+    im.src = src ? (/^(https?:|data:|blob:|\/)/.test(src) ? src : "/" + src) : "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    return im;
+  }
+  function field(label, path, o) {
+    o = o || {};
+    var val = get(cfg, path);
+    var inp = o.multi ? h("textarea", { rows: o.rows || 3 }) : h("input", { type: o.num ? "number" : "text", inputmode: o.num ? "decimal" : null, step: o.num ? "any" : null });
+    inp.value = val == null ? "" : val;
+    if (o.ph) inp.placeholder = o.ph;
+    if (o.max) inp.maxLength = o.max;
+    var cnt = o.count ? h("small", { class: "cnt" }) : null;
+    function upd() { if (cnt) { var n = inp.value.length; cnt.textContent = n + " / " + o.count; cnt.className = "cnt" + (n > o.count ? " over" : ""); } }
+    inp.oninput = function () { var v = inp.value; if (o.num) v = v === "" ? "" : Number(v); set(cfg, path, v); dirty(); upd(); if (o.onchange) o.onchange(v); };
+    upd();
+    return h("div", { class: "fld" }, h("label", {}, label), inp, cnt, o.hint ? h("small", {}, o.hint) : null);
+  }
+  function selField(label, path, opts, o) {
+    o = o || {};
+    var sel = h("select", {}), cur = String(get(cfg, path) == null ? "" : get(cfg, path)), found = false;
+    opts.forEach(function (x) { var v = Array.isArray(x) ? x[0] : x, l = Array.isArray(x) ? x[1] : x; var op = h("option", { value: v }, l); if (String(v) === cur) { op.selected = true; found = true; } sel.appendChild(op); });
+    if (!found && cur) { var ex = h("option", { value: cur }, cur); ex.selected = true; sel.appendChild(ex); }
+    sel.onchange = function () { set(cfg, path, sel.value); dirty(); if (o.onchange) o.onchange(sel.value); };
+    return h("div", { class: "fld" }, h("label", {}, label), sel, o.hint ? h("small", {}, o.hint) : null);
+  }
+  function colorField(label, path) {
+    var inp = h("input", { type: "color" }), txt = h("input", { type: "text", class: "hex", maxLength: 9 });
+    var v = get(cfg, path) || "#ffffff"; inp.value = /^#[0-9a-f]{6}$/i.test(v) ? v : "#ffffff"; txt.value = v;
+    inp.oninput = function () { txt.value = inp.value; set(cfg, path, inp.value); dirty(); };
+    txt.oninput = function () { if (/^#[0-9a-f]{6}$/i.test(txt.value)) { inp.value = txt.value; set(cfg, path, txt.value); dirty(); } };
+    return h("div", { class: "fld colrow" }, h("label", {}, label), h("div", { class: "cpick" }, inp, txt));
+  }
+  function swField(label, path, o) { o = o || {}; return h("div", { class: "fld" }, sw(get(cfg, path) !== false && (o.def !== false || get(cfg, path) === true), function (v) { set(cfg, path, v); dirty(); if (o.onchange) o.onchange(v); }, label)); }
+  function imgField(label, path, folder, hint) {
+    var f = field(label, path, { ph: "assets/images/…  অথবা https://…", hint: hint || "ছবির পথ/লিংক বসান, অথবা “📁 ছবি বাছুন” চাপুন" });
+    var inp = f.querySelector("input"), th = thumb(get(cfg, path)), tm;
+    inp.addEventListener("input", function () { clearTimeout(tm); tm = setTimeout(function () { th.src = thumb(inp.value).src; }, 400); });
+    var btn = h("button", { class: "ib pick", type: "button", onclick: function () { pickImage(folder || "uploads", function (p, u) { inp.value = p; set(cfg, path, p); th.src = u; dirty(); }); } }, "📁 ছবি বাছুন");
+    var row = h("div", { class: "cardrow" }); f.insertBefore(row, inp); row.appendChild(th); row.appendChild(inp); row.appendChild(btn);
+    return f;
+  }
+  function strList(path, o) {
+    o = o || {};
+    var wrap = h("div", { class: "list" });
+    if (!Array.isArray(get(cfg, path))) set(cfg, path, []);
+    function draw() {
+      wrap.textContent = "";
+      var a = get(cfg, path);
+      a.forEach(function (v, i) {
+        var inp = h(o.multi ? "textarea" : "input", { type: "text", rows: 2, placeholder: o.ph || "" }); inp.value = v;
+        var th = o.preview ? thumb(v) : null, tm;
+        inp.oninput = function () { a[i] = inp.value; dirty(); if (th) { clearTimeout(tm); tm = setTimeout(function () { th.src = thumb(inp.value).src; }, 400); } };
+        var b = h("div", { class: "li-b" });
+        if (o.folder) b.appendChild(h("button", { class: "ib pick", type: "button", onclick: function () { pickImage(o.folder, function (p, u) { a[i] = p; inp.value = p; if (th) th.src = u; dirty(); }); } }, "📁 ছবি"));
+        b.appendChild(h("button", { class: "ib", type: "button", disabled: i === 0, onclick: function () { if (mv(a, i, -1)) { dirty(); draw(); } } }, "↑"));
+        b.appendChild(h("button", { class: "ib", type: "button", disabled: i === a.length - 1, onclick: function () { if (mv(a, i, 1)) { dirty(); draw(); } } }, "↓"));
+        b.appendChild(h("button", { class: "ib", type: "button", onclick: function () { a.splice(i, 1); dirty(); draw(); } }, "🗑"));
+        wrap.appendChild(h("div", { class: "li" }, th, inp, b));
+      });
+      wrap.appendChild(h("button", { class: "btn ghost", type: "button", onclick: function () { a.push(""); dirty(); draw(); var l = wrap.querySelectorAll(".li input,.li textarea"); if (l.length) l[l.length - 1].focus(); } }, "＋ " + (o.addText || "নতুন যোগ করুন")));
+    }
+    draw(); return wrap;
+  }
+
+  /* ---------- schema-driven editor ---------- */
+  var openItems = {};
+  function build(root, spec, base) {
+    spec.forEach(function (f) {
+      var p = f.k ? (base ? base + "." + f.k : f.k) : base, el = null, L = f.l;
+      switch (f.t) {
+        case "text": el = field(L, p, { ph: f.ph, hint: f.hint, count: f.count }); break;
+        case "area": el = field(L, p, { multi: true, rows: f.rows || 3, hint: f.hint, count: f.count }); break;
+        case "num": el = field(L, p, { num: true, hint: f.hint }); break;
+        case "sel": el = selField(L, p, f.o, { hint: f.hint }); break;
+        case "tog": el = swField(L, p, { def: f.def }); break;
+        case "color": el = colorField(L, p); break;
+        case "img": el = imgField(L, p, f.folder, f.hint); break;
+        case "strs": el = h("div", {}, h("div", { class: "sub-h" }, L), strList(p, { ph: f.ph, multi: f.multi, addText: f.add })); break;
+        case "imgs": el = h("div", {}, h("div", { class: "sub-h" }, L), strList(p, { preview: true, folder: f.folder || "uploads", ph: "assets/images/… অথবা https://…", addText: f.add || "নতুন ছবি" })); break;
+        case "h": el = h("div", { class: "sub-h" }, L); break;
+        case "note": el = h("div", { class: "hint" }, L); break;
+        case "row": el = h("div", { class: "row" + (f.cols || 2) }); build(el, f.f, base); break;
+        case "list": el = objList(p, f); break;
+      }
+      if (el) root.appendChild(el);
+    });
+    return root;
+  }
+  function objList(path, f) {
+    var wrap = h("div", { class: "olist" });
+    if (!Array.isArray(get(cfg, path))) set(cfg, path, []);
+    function draw() {
+      wrap.textContent = "";
+      var a = get(cfg, path);
+      if (f.l) wrap.appendChild(h("div", { class: "sub-h" }, f.l));
+      a.forEach(function (it, i) {
+        var key = path + "#" + (it.id || i), open = !!openItems[key];
+        var tEl = h("b", {}, f.title(it, i) || "(নাম নেই)");
+        var head = h("div", { class: "oi-h" },
+          h("span", { class: "oi-t", onclick: function () { openItems[key] = !openItems[key]; draw(); } }, h("span", { class: "chev" }, open ? "▼" : "▶"), tEl,
+            it.sample ? h("span", { class: "sample", title: "নমুনা কনটেন্ট – লাইভ করার আগে বদলান" }, "SAMPLE") : null,
+            f.hasShow && it.show === false ? h("span", { class: "hid" }, "লুকানো") : null),
+          h("div", { class: "oi-c" },
+            f.hasShow ? sw(it.show !== false, function (v) { it.show = v; dirty(); draw(); }) : null,
+            h("button", { class: "ib", type: "button", disabled: i === 0, onclick: function () { if (mv(a, i, -1)) { dirty(); draw(); } } }, "↑"),
+            h("button", { class: "ib", type: "button", disabled: i === a.length - 1, onclick: function () { if (mv(a, i, 1)) { dirty(); draw(); } } }, "↓"),
+            h("button", { class: "ib", type: "button", title: "মুছুন", onclick: function () { if (confirm("এটি মুছে ফেলবেন?")) { a.splice(i, 1); dirty(); draw(); } } }, "🗑")));
+        var card = h("div", { class: "oi" + (open ? " open" : "") + (f.hasShow && it.show === false ? " off" : "") }, head);
+        if (open) {
+          var body = h("div", { class: "oi-b" });
+          build(body, f.f, path + "." + i);
+          if (it.sample) body.appendChild(h("div", { class: "fld" }, h("button", { class: "btn", type: "button", onclick: function () { it.sample = false; dirty(); draw(); } }, "✔ এটি আসল কনটেন্ট – SAMPLE চিহ্ন সরান")));
+          body.addEventListener("input", function () { tEl.textContent = f.title(it, i) || "(নাম নেই)"; });
+          card.appendChild(body);
+        }
+        wrap.appendChild(card);
+      });
+      wrap.appendChild(h("button", { class: "btn ghost block", type: "button", onclick: function () { var n = f.def(); a.push(n); openItems[path + "#" + (n.id || a.length - 1)] = true; dirty(); draw(); } }, "＋ " + (f.add || "নতুন যোগ করুন")));
+    }
+    draw(); return wrap;
+  }
+
+  /* ---------- schemas ---------- */
+  var ICONS = ["code", "cart", "brand", "ads", "seo", "social", "app", "bot", "rocket", "target", "chart", "shield", "clock", "heart", "star", "mail", "phone", "chat", "pin", "food", "health", "school", "truck", "building"];
+  var CTA = function (k, l) { return { t: "row", f: [{ t: "text", k: k + ".label", l: l + " – লেখা" }, { t: "text", k: k + ".href", l: l + " – লিংক", ph: "/contact  অথবা  whatsapp / messenger / call", hint: "বিশেষ মান: whatsapp, messenger, call, email" }] }; };
+  var SEC_HEAD = function () { return [{ t: "text", k: "eyebrow", l: "ছোট লেবেল (Eyebrow)" }, { t: "text", k: "title", l: "টাইটেল", hint: "রঙিন করতে [[এভাবে]] লিখুন" }, { t: "area", k: "sub", l: "সাবটাইটেল", rows: 2 }]; };
+  var ITEM_ICON = [{ t: "sel", k: "icon", l: "আইকন", o: ICONS }, { t: "text", k: "title", l: "টাইটেল" }, { t: "area", k: "text", l: "বিবরণ", rows: 2 }];
+
+  var HOME = {
+    hero: { icon: "🚀", name: "হিরো (Hero)", desc: "প্রথম স্ক্রিনের বড় হেডলাইন", path: "home.hero", spec: [
+      { t: "text", k: "eyebrow", l: "ছোট লেবেল" }, { t: "area", k: "title", l: "হেডলাইন", rows: 3, hint: "রঙিন করতে [[এভাবে]] লিখুন" }, { t: "area", k: "sub", l: "সাব-টেক্সট", rows: 3 },
+      CTA("primary", "প্রধান বাটন"), CTA("secondary", "দ্বিতীয় বাটন"),
+      { t: "row", f: [{ t: "img", k: "image", l: "হিরো ছবি (ASCII)", folder: "hero" }, { t: "img", k: "card", l: "ভাসমান কার্ড ছবি", folder: "hero" }] },
+      { t: "list", k: "stats", l: "পরিসংখ্যান (নমুনা – আসল সংখ্যা দিন)", add: "নতুন পরিসংখ্যান", title: function (s) { return (s.value || "") + (s.suffix || "") + " " + (s.label || ""); }, def: function () { return { value: 10, suffix: "+", label: "নতুন", sample: true }; }, f: [{ t: "row", f: [{ t: "text", k: "value", l: "সংখ্যা" }, { t: "text", k: "suffix", l: "চিহ্ন (+, x, %)" }] }, { t: "text", k: "label", l: "লেবেল" }] }] },
+    marquee: { icon: "🎞️", name: "চলমান স্ট্রিপ (Marquee)", desc: "ক্যাপাবিলিটি লেখার স্ক্রলিং ব্যান্ড", path: "home.marquee", spec: [{ t: "strs", k: "items", l: "শব্দসমূহ", add: "নতুন শব্দ" }] },
+    services: { icon: "🛠️", name: "সার্ভিস (হোম)", desc: "সার্ভিস কার্ডের ইন্ট্রো টেক্সট", path: "home.services", spec: SEC_HEAD().concat([CTA("cta", "বাটন"), { t: "note", l: "সার্ভিসের তালিকা বদলাতে বাম মেনুর “সার্ভিস” পেজে যান।" }]) },
+    about: { icon: "🏢", name: "আমাদের সম্পর্কে (হোম)", desc: "স্টোরি, পয়েন্ট ও ছবি", path: "home.about", spec: [{ t: "text", k: "eyebrow", l: "ছোট লেবেল" }, { t: "text", k: "title", l: "টাইটেল", hint: "[[এভাবে]] রঙিন" }, { t: "area", k: "text", l: "টেক্সট", rows: 6, hint: "নতুন প্যারাগ্রাফের জন্য একটি খালি লাইন দিন" }, { t: "strs", k: "points", l: "পয়েন্ট (টিক চিহ্নসহ)", add: "নতুন পয়েন্ট" }, { t: "img", k: "image", l: "ছবি", folder: "about" }, CTA("cta", "বাটন")] },
+    why: { icon: "⭐", name: "কেন আমরা", desc: "Why choose us – আইকন কার্ড", path: "home.why", spec: SEC_HEAD().concat([{ t: "list", k: "items", l: "কার্ডসমূহ", add: "নতুন কার্ড", title: function (x) { return x.title; }, def: function () { return { icon: "star", title: "নতুন", text: "" }; }, f: ITEM_ICON }]) },
+    portfolio: { icon: "🖼️", name: "পোর্টফোলিও (হোম)", desc: "ফিচার্ড কেস স্টাডির ইন্ট্রো", path: "home.portfolio", spec: SEC_HEAD().concat([CTA("cta", "বাটন"), { t: "note", l: "কোন কেস স্টাডি হোমে দেখাবে তা “পোর্টফোলিও” পেজে “Featured” সুইচ দিয়ে ঠিক করুন।" }]) },
+    process: { icon: "🧭", name: "কাজের ধাপ (Process)", desc: "নম্বরযুক্ত ধাপ", path: "home.process", spec: SEC_HEAD().concat([{ t: "list", k: "steps", l: "ধাপসমূহ", add: "নতুন ধাপ", title: function (x, i) { return (i + 1) + ". " + x.title; }, def: function () { return { title: "নতুন ধাপ", text: "" }; }, f: [{ t: "text", k: "title", l: "টাইটেল" }, { t: "area", k: "text", l: "বিবরণ", rows: 2 }] }]) },
+    industries: { icon: "🏭", name: "ইন্ডাস্ট্রি", desc: "কোন কোন সেক্টরে কাজ করেন", path: "home.industries", spec: SEC_HEAD().concat([{ t: "list", k: "items", l: "ইন্ডাস্ট্রিসমূহ", add: "নতুন ইন্ডাস্ট্রি", title: function (x) { return x.title; }, def: function () { return { icon: "building", title: "নতুন", text: "" }; }, f: ITEM_ICON }]) },
+    pricing: { icon: "💰", name: "প্রাইসিং (হোম)", desc: "প্যাকেজ সেকশনের ইন্ট্রো", path: "home.pricing", spec: SEC_HEAD().concat([CTA("cta", "বাটন"), { t: "note", l: "প্যাকেজ ও দাম বদলাতে বাম মেনুর “প্রাইসিং প্যাকেজ” পেজে যান।" }]) },
+    testimonials: { icon: "💬", name: "টেস্টিমোনিয়াল (হোম)", desc: "ক্লায়েন্ট মতামতের ইন্ট্রো", path: "home.testimonials", spec: SEC_HEAD().concat([{ t: "note", l: "মতামতের তালিকা “টেস্টিমোনিয়াল” পেজে বদলান।" }]) },
+    faq: { icon: "❓", name: "FAQ (হোম)", desc: "প্রশ্নোত্তরের ইন্ট্রো", path: "home.faq", spec: SEC_HEAD().concat([{ t: "note", l: "প্রশ্ন-উত্তর “FAQ” পেজে বদলান।" }]) },
+    contact: { icon: "✉️", name: "যোগাযোগ সেকশন (হোম)", desc: "ফর্মের পাশের টেক্সট", path: "home.contact", spec: SEC_HEAD().concat([{ t: "note", l: "ফোন/ইমেইল/সোশ্যাল লিংক “যোগাযোগের তথ্য” পেজে বদলান।" }]) },
+    cta: { icon: "📣", name: "শেষের CTA", desc: "পেজের শেষ বড় কল-টু-অ্যাকশন", path: "home.cta", spec: [{ t: "text", k: "title", l: "টাইটেল" }, { t: "area", k: "sub", l: "সাবটাইটেল", rows: 2 }, CTA("primary", "প্রধান বাটন"), CTA("secondary", "দ্বিতীয় বাটন")] }
+  };
+  var HOME_IDS = ["hero", "marquee", "services", "about", "why", "portfolio", "process", "industries", "pricing", "testimonials", "faq", "contact", "cta"];
+
+  var PAGES = {
+    services: { icon: "🛠️", name: "সার্ভিস", desc: "সার্ভিস তালিকা (যোগ/এডিট/সাজানো)", spec: [
+      { t: "h", l: "সার্ভিস পেজের টেক্সট" }, { t: "text", k: "servicesPage.eyebrow", l: "ছোট লেবেল" }, { t: "text", k: "servicesPage.title", l: "টাইটেল" }, { t: "area", k: "servicesPage.sub", l: "সাবটাইটেল", rows: 2 }, { t: "text", k: "servicesPage.ctaTitle", l: "শেষের CTA টাইটেল" }, { t: "text", k: "servicesPage.ctaSub", l: "শেষের CTA সাবটাইটেল" },
+      { t: "list", k: "services", l: "সার্ভিস তালিকা", hasShow: true, add: "নতুন সার্ভিস", title: function (s) { return s.title; }, def: function () { return { id: uid(), slug: "new-service-" + Date.now().toString(36).slice(-4), icon: "star", title: "নতুন সার্ভিস", summary: "", details: "", features: [], image: "", from: "", show: true }; },
+        f: [{ t: "text", k: "title", l: "সার্ভিসের নাম" }, { t: "text", k: "slug", l: "URL নাম (ইংরেজি, ছোট হাতের, - দিয়ে)", hint: "লিংক হবে /services#এই-নাম" }, { t: "sel", k: "icon", l: "আইকন", o: ICONS }, { t: "area", k: "summary", l: "ছোট সারাংশ (কার্ডে)", rows: 2 }, { t: "area", k: "details", l: "বিস্তারিত", rows: 3 }, { t: "strs", k: "features", l: "ফিচার তালিকা", add: "নতুন ফিচার" }, { t: "row", f: [{ t: "text", k: "from", l: "শুরুর দাম (যেমন ৳25,000)" }, { t: "img", k: "image", l: "ছবি", folder: "services" }] }] }] },
+    portfolio: { icon: "🖼️", name: "পোর্টফোলিও ও কেস স্টাডি", desc: "প্রজেক্ট যোগ/এডিট/সাজানো", spec: [
+      { t: "h", l: "পোর্টফোলিও পেজের টেক্সট" }, { t: "text", k: "portfolioPage.eyebrow", l: "ছোট লেবেল" }, { t: "text", k: "portfolioPage.title", l: "টাইটেল" }, { t: "area", k: "portfolioPage.sub", l: "সাবটাইটেল", rows: 2 }, { t: "text", k: "portfolioPage.ctaTitle", l: "শেষের CTA টাইটেল" }, { t: "text", k: "portfolioPage.ctaSub", l: "শেষের CTA সাবটাইটেল" },
+      { t: "note", l: "নতুন কেস স্টাডি যোগ করলে প্রকাশের সাথে সাথেই /work/আপনার-slug লিংকে খুলবে। সার্চ ইঞ্জিনের জন্য স্ট্যাটিক পেজ তৈরি হয় পরের ডিপ্লয়ে (README দেখুন)।" },
+      { t: "list", k: "portfolio", l: "প্রজেক্টসমূহ", hasShow: true, add: "নতুন প্রজেক্ট", title: function (p) { return p.title; }, def: function () { return { id: uid(), slug: "new-project-" + Date.now().toString(36).slice(-4), title: "নতুন প্রজেক্ট", client: "", category: "", year: String(new Date().getFullYear()), summary: "", challenge: "", solution: "", results: [], tags: [], cover: "", gallery: [], link: "", featured: false, show: true }; },
+        f: [{ t: "row", f: [{ t: "text", k: "title", l: "প্রজেক্টের নাম" }, { t: "text", k: "slug", l: "URL নাম (ইংরেজি, ছোট হাতের)" }] }, { t: "row", f: [{ t: "text", k: "client", l: "ক্লায়েন্ট" }, { t: "text", k: "category", l: "ক্যাটাগরি (যেমন E-commerce · Branding)" }] }, { t: "row", f: [{ t: "text", k: "year", l: "সাল" }, { t: "text", k: "link", l: "লাইভ লিংক (ঐচ্ছিক)" }] }, { t: "tog", k: "featured", l: "হোমপেজে দেখান (Featured)", def: false },
+          { t: "area", k: "summary", l: "সারাংশ", rows: 2 }, { t: "area", k: "challenge", l: "চ্যালেঞ্জ", rows: 3 }, { t: "area", k: "solution", l: "আমাদের সমাধান", rows: 3 },
+          { t: "list", k: "results", l: "ফলাফল (নমুনা – আসল সংখ্যা দিন)", add: "নতুন ফলাফল", title: function (r) { return (r.value || "") + " " + (r.label || ""); }, def: function () { return { value: "", label: "" }; }, f: [{ t: "row", f: [{ t: "text", k: "value", l: "মান (যেমন 2.8x)" }, { t: "text", k: "label", l: "লেবেল" }] }] },
+          { t: "strs", k: "tags", l: "ট্যাগ", add: "নতুন ট্যাগ" }, { t: "img", k: "cover", l: "কভার ছবি", folder: "portfolio" }, { t: "imgs", k: "gallery", l: "গ্যালারি ছবি", folder: "portfolio" }] }] },
+    packages: { icon: "💰", name: "প্রাইসিং প্যাকেজ", desc: "প্যাকেজ ও দাম (৳)", spec: [
+      { t: "h", l: "প্রাইসিং পেজের টেক্সট" }, { t: "text", k: "pricingPage.eyebrow", l: "ছোট লেবেল" }, { t: "text", k: "pricingPage.title", l: "টাইটেল" }, { t: "area", k: "pricingPage.sub", l: "সাবটাইটেল", rows: 2 }, { t: "area", k: "pricingPage.note", l: "নিচের নোট", rows: 2 }, { t: "text", k: "pricingPage.faqTitle", l: "FAQ টাইটেল" },
+      { t: "list", k: "packages", l: "প্যাকেজ", hasShow: true, add: "নতুন প্যাকেজ", title: function (k) { return k.name + " – " + k.price; }, def: function () { return { id: uid(), name: "নতুন প্যাকেজ", price: "৳0", period: "one-time", desc: "", features: [], highlight: false, badge: "", cta: "Get started", show: true }; },
+        f: [{ t: "row", f: [{ t: "text", k: "name", l: "নাম" }, { t: "text", k: "price", l: "দাম (যেমন ৳25,000)" }] }, { t: "row", f: [{ t: "text", k: "period", l: "সময় (one-time / per month)" }, { t: "text", k: "badge", l: "ব্যাজ (যেমন Most popular)" }] }, { t: "area", k: "desc", l: "ছোট বিবরণ", rows: 2 }, { t: "strs", k: "features", l: "ফিচার", add: "নতুন ফিচার" }, { t: "text", k: "cta", l: "বাটনের লেখা" }, { t: "tog", k: "highlight", l: "হাইলাইট করুন (গাঢ় কার্ড)", def: false }] }] },
+    testimonials: { icon: "💬", name: "টেস্টিমোনিয়াল", desc: "ক্লায়েন্টের মতামত", spec: [
+      { t: "list", k: "testimonials", l: "মতামতসমূহ", hasShow: true, add: "নতুন মতামত", title: function (t) { return t.name + (t.company ? " – " + t.company : ""); }, def: function () { return { id: uid(), name: "", role: "", company: "", text: "", rating: 5, avatar: "", show: true }; },
+        f: [{ t: "row", f: [{ t: "text", k: "name", l: "নাম" }, { t: "text", k: "role", l: "পদবি" }] }, { t: "row", f: [{ t: "text", k: "company", l: "কোম্পানি" }, { t: "num", k: "rating", l: "রেটিং (১–৫)" }] }, { t: "area", k: "text", l: "মতামত", rows: 3 }, { t: "img", k: "avatar", l: "ছবি/অ্যাভাটার", folder: "team" }] }] },
+    faq: { icon: "❓", name: "FAQ", desc: "প্রশ্ন ও উত্তর", spec: [
+      { t: "list", k: "faq", l: "প্রশ্ন-উত্তর", hasShow: true, add: "নতুন প্রশ্ন", title: function (f) { return f.q; }, def: function () { return { q: "নতুন প্রশ্ন?", a: "", show: true }; }, f: [{ t: "text", k: "q", l: "প্রশ্ন" }, { t: "area", k: "a", l: "উত্তর", rows: 3 }] }] },
+    team: { icon: "👥", name: "টিম", desc: "টিম সদস্য", spec: [
+      { t: "list", k: "team", l: "সদস্যরা", hasShow: true, add: "নতুন সদস্য", title: function (m) { return m.name + (m.role ? " – " + m.role : ""); }, def: function () { return { id: uid(), name: "", role: "", bio: "", photo: "", show: true }; },
+        f: [{ t: "row", f: [{ t: "text", k: "name", l: "নাম" }, { t: "text", k: "role", l: "পদবি" }] }, { t: "area", k: "bio", l: "পরিচিতি", rows: 2 }, { t: "img", k: "photo", l: "ছবি", folder: "team" }] }] },
+    about: { icon: "🏢", name: "About পেজ", desc: "স্টোরি, মিশন, মূল্যবোধ", spec: [
+      { t: "text", k: "aboutPage.eyebrow", l: "ছোট লেবেল" }, { t: "text", k: "aboutPage.title", l: "টাইটেল" }, { t: "area", k: "aboutPage.sub", l: "সাবটাইটেল", rows: 2 },
+      { t: "text", k: "aboutPage.storyTitle", l: "স্টোরির টাইটেল" }, { t: "area", k: "aboutPage.story", l: "স্টোরি", rows: 6 }, { t: "text", k: "aboutPage.missionTitle", l: "মিশনের টাইটেল" }, { t: "area", k: "aboutPage.mission", l: "মিশন", rows: 3 },
+      { t: "text", k: "aboutPage.valuesTitle", l: "মূল্যবোধ টাইটেল" }, { t: "list", k: "aboutPage.values", l: "মূল্যবোধ", add: "নতুন", title: function (x) { return x.title; }, def: function () { return { icon: "star", title: "নতুন", text: "" }; }, f: ITEM_ICON },
+      { t: "text", k: "aboutPage.teamTitle", l: "টিম টাইটেল" }, { t: "area", k: "aboutPage.teamSub", l: "টিম সাবটাইটেল", rows: 2 }] },
+    contactPage: { icon: "📞", name: "Contact পেজ (টেক্সট)", desc: "পেজের হেডিং ও ফর্মের টাইটেল", spec: [{ t: "text", k: "contactPage.eyebrow", l: "ছোট লেবেল" }, { t: "text", k: "contactPage.title", l: "টাইটেল" }, { t: "area", k: "contactPage.sub", l: "সাবটাইটেল", rows: 2 }, { t: "text", k: "contactPage.infoTitle", l: "যোগাযোগ তথ্যের টাইটেল" }, { t: "text", k: "contactPage.formTitle", l: "ফর্মের টাইটেল" }] },
+    privacy: { icon: "🔒", name: "Privacy Policy", desc: "গোপনীয়তা নীতি", spec: [{ t: "text", k: "legal.privacy.title", l: "টাইটেল" }, { t: "text", k: "legal.privacy.updated", l: "সর্বশেষ আপডেট (যেমন 1 January 2026)" }, { t: "area", k: "legal.privacy.body", l: "লেখা", rows: 18, hint: "## দিয়ে হেডিং, - দিয়ে তালিকা, **বোল্ড**" }] },
+    terms: { icon: "📜", name: "Terms of Service", desc: "শর্তাবলি", spec: [{ t: "text", k: "legal.terms.title", l: "টাইটেল" }, { t: "text", k: "legal.terms.updated", l: "সর্বশেষ আপডেট" }, { t: "area", k: "legal.terms.body", l: "লেখা", rows: 18, hint: "## দিয়ে হেডিং, - দিয়ে তালিকা, **বোল্ড**" }] },
+    notfound: { icon: "🧭", name: "404 পেজ", desc: "পেজ না পেলে যা দেখায়", spec: [{ t: "text", k: "notFound.title", l: "টাইটেল" }, { t: "area", k: "notFound.text", l: "টেক্সট", rows: 2 }, { t: "text", k: "notFound.btn", l: "বাটনের লেখা" }] }
+  };
+
+  var SITE = {
+    brand: { icon: "🎨", name: "ব্র্যান্ড ও লোগো", desc: "নাম, লোগো, ফেভিকন", spec: [{ t: "text", k: "brand.name", l: "ব্র্যান্ডের নাম" }, { t: "text", k: "brand.tagline", l: "ট্যাগলাইন" }, { t: "img", k: "brand.logo", l: "লোগো (হালকা ব্যাকগ্রাউন্ডের জন্য)", folder: "icons", hint: "SVG লোগো assets/images/icons ফোল্ডারে রেখে পথ দিন; আপলোডে JPG/PNG/WebP চলে" }, { t: "img", k: "brand.logoLight", l: "লোগো (গাঢ় ব্যাকগ্রাউন্ড / ফুটারের জন্য)", folder: "icons" }, { t: "text", k: "brand.favicon", l: "ফেভিকন ফাইলের পথ", hint: "প্রজেক্টের রুটে favicon.svg থাকে" }] },
+    nav: { icon: "🧭", name: "মেনু ও হেডার", desc: "নেভিগেশন লিংক, হেডার বাটন", spec: [{ t: "list", k: "nav", l: "মেনু লিংক", hasShow: true, add: "নতুন লিংক", title: function (n) { return n.label + "  →  " + n.href; }, def: function () { return { label: "নতুন", href: "/", show: true }; }, f: [{ t: "row", f: [{ t: "text", k: "label", l: "লেখা" }, { t: "text", k: "href", l: "লিংক (যেমন /services)" }] }] }, { t: "h", l: "হেডারের বাটন" }, CTA("headerCta", "হেডার বাটন")] },
+    footer: { icon: "🦶", name: "ফুটার", desc: "ফুটারের টেক্সট ও লিংক", spec: [{ t: "area", k: "footer.about", l: "ফুটারে সংক্ষিপ্ত পরিচিতি", rows: 2 }, { t: "text", k: "footer.copyright", l: "কপিরাইট", hint: "{year} লিখলে সাল নিজে বসবে" },
+      { t: "list", k: "footer.columns", l: "ফুটারের কলাম", add: "নতুন কলাম", title: function (c) { return c.title; }, def: function () { return { title: "নতুন কলাম", links: [] }; }, f: [{ t: "text", k: "title", l: "কলামের টাইটেল" }, { t: "list", k: "links", l: "লিংক", add: "নতুন লিংক", title: function (l) { return l.label; }, def: function () { return { label: "নতুন", href: "/" }; }, f: [{ t: "row", f: [{ t: "text", k: "label", l: "লেখা" }, { t: "text", k: "href", l: "লিংক" }] }] }] }] },
+    contact: { icon: "📞", name: "যোগাযোগের তথ্য", desc: "ফোন, WhatsApp, Messenger, সোশ্যাল", spec: [
+      { t: "row", f: [{ t: "text", k: "contact.phone", l: "ফোন", ph: "+8801700000000" }, { t: "text", k: "contact.whatsapp", l: "WhatsApp নম্বর (কান্ট্রি কোডসহ)", ph: "8801700000000" }] },
+      { t: "row", f: [{ t: "text", k: "contact.messenger", l: "Messenger লিংক", ph: "https://m.me/yourpage" }, { t: "text", k: "contact.email", l: "ইমেইল" }] },
+      { t: "area", k: "contact.address", l: "ঠিকানা", rows: 2 }, { t: "text", k: "contact.hours", l: "অফিস সময়" },
+      { t: "h", l: "সোশ্যাল লিংক (খালি রাখলে দেখাবে না)" }, { t: "row", f: [{ t: "text", k: "contact.social.facebook", l: "Facebook" }, { t: "text", k: "contact.social.instagram", l: "Instagram" }] }, { t: "row", f: [{ t: "text", k: "contact.social.linkedin", l: "LinkedIn" }, { t: "text", k: "contact.social.youtube", l: "YouTube" }] }, { t: "row", f: [{ t: "text", k: "contact.social.behance", l: "Behance" }, { t: "text", k: "contact.social.github", l: "GitHub" }] }] },
+    form: { icon: "📝", name: "কন্টাক্ট ফর্ম", desc: "সফল বার্তা, অপশন, কুলডাউন", spec: [{ t: "text", k: "form.successTitle", l: "সফল হলে টাইটেল" }, { t: "area", k: "form.successText", l: "সফল হলে বার্তা", rows: 2 }, { t: "num", k: "form.cooldownMinutes", l: "একই নম্বর/ইমেইলে কত মিনিট পর আবার পাঠানো যাবে", hint: "ডিফল্ট ২ মিনিট (স্প্যাম প্রটেকশন)" }, { t: "strs", k: "form.interests", l: "“আমার যা দরকার” ড্রপডাউন", add: "নতুন অপশন" }, { t: "strs", k: "form.budgets", l: "বাজেটের অপশন", add: "নতুন অপশন" },
+      { t: "h", l: "ফর্মের লেবেল ও প্লেসহোল্ডার (খালি রাখলে ডিফল্ট লেখা দেখাবে)" },
+      { t: "row", f: [{ t: "text", k: "form.labels.name", l: "নাম – লেবেল" }, { t: "text", k: "form.labels.namePh", l: "নাম – প্লেসহোল্ডার" }] },
+      { t: "row", f: [{ t: "text", k: "form.labels.phone", l: "ফোন – লেবেল" }, { t: "text", k: "form.labels.phonePh", l: "ফোন – প্লেসহোল্ডার" }] },
+      { t: "row", f: [{ t: "text", k: "form.labels.email", l: "ইমেইল – লেবেল" }, { t: "text", k: "form.labels.emailPh", l: "ইমেইল – প্লেসহোল্ডার" }] },
+      { t: "row", f: [{ t: "text", k: "form.labels.company", l: "কোম্পানি – লেবেল" }, { t: "text", k: "form.labels.companyPh", l: "কোম্পানি – প্লেসহোল্ডার" }] },
+      { t: "row", f: [{ t: "text", k: "form.labels.interest", l: "সার্ভিস ড্রপডাউন – লেবেল" }, { t: "text", k: "form.labels.interestPh", l: "সার্ভিস ড্রপডাউন – প্রথম অপশন" }] },
+      { t: "row", f: [{ t: "text", k: "form.labels.budget", l: "বাজেট – লেবেল" }, { t: "text", k: "form.labels.budgetPh", l: "বাজেট – প্রথম অপশন" }] },
+      { t: "row", f: [{ t: "text", k: "form.labels.message", l: "মেসেজ – লেবেল" }, { t: "text", k: "form.labels.messagePh", l: "মেসেজ – প্লেসহোল্ডার" }] },
+      { t: "text", k: "form.labels.submit", l: "সাবমিট বাটনের লেখা" }, { t: "area", k: "form.labels.note", l: "বাটনের নিচের নোট", rows: 2 }, { t: "text", k: "form.labels.privacyLink", l: "প্রাইভেসি লিংকের লেখা" }] },
+    texts: { icon: "🔤", name: "বাটন ও সাধারণ লেখা", desc: "কার্ড ও বাটনের ছোট লেখা (Learn more, Get a quote ইত্যাদি)", spec: [
+      { t: "row", f: [{ t: "text", k: "text.learnMore", l: "সার্ভিস কার্ডের “Learn more”" }, { t: "text", k: "text.getQuote", l: "সার্ভিস পেজের “Get a quote”" }] },
+      { t: "row", f: [{ t: "text", k: "text.startingFrom", l: "“Starting from” (দামের আগে)" }, { t: "text", k: "text.nextProject", l: "“Next project”" }] },
+      { t: "row", f: [{ t: "text", k: "text.challenge", l: "কেস স্টাডি: “The challenge”" }, { t: "text", k: "text.solution", l: "কেস স্টাডি: “Our solution”" }] }] },
+    tracking: { icon: "📈", name: "ট্র্যাকিং ও Pixel", desc: "Meta Pixel, অ্যাক্টিভিটি ট্র্যাকিং", spec: [
+      { t: "note", l: "ট্র্যাকিংয়ে কোনো নাম/ফোন/ইমেইল যায় না। শুধু বেনামী ব্যবহার তথ্য (পেজ, স্ক্রল, ক্লিক, ডিভাইস, সোর্স) আপনার গুগল শিটে জমা হয়। ব্রাউজারে “Do Not Track” চালু থাকলে ট্র্যাকিং বন্ধ থাকে।" },
+      { t: "text", k: "tracking.fbPixelId", l: "Facebook (Meta) Pixel ID", ph: "123456789012345", hint: "খালি রাখলে Pixel চালু হবে না (শিটে ইভেন্ট লগ তবুও জমা হবে)" }, { t: "tog", k: "tracking.activity", l: "ভিজিটর অ্যাক্টিভিটি ও ইভেন্ট শিটে সেভ করুন" }, { t: "num", k: "tracking.sample", l: "কত শতাংশ ভিজিটরের তথ্য সেভ হবে (১–১০০)", hint: "ট্রাফিক বেশি হলে ৩০–৫০ দিন। Lead সবসময় ১০০% সেভ হয়।" }] }
+  };
+  /* ---------- helpers for pages ---------- */
+  function download(name, blobOrText, type) {
+    var blob = blobOrText instanceof Blob ? blobOrText : new Blob([blobOrText], { type: type || "text/plain" });
+    var a = h("a", { href: URL.createObjectURL(blob), download: name });
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+  function header(icon, title, desc, extra) {
+    return h("div", { class: "ph" }, h("div", { class: "sec-ic" }, icon), h("div", { class: "grow" }, h("h2", {}, title), desc ? h("p", {}, desc) : null), extra || null);
+  }
+  function box(children) { var d = h("div", { class: "pg" }); [].concat(children).forEach(function (c) { if (c) d.appendChild(c); }); return d; }
+  function countSamples() { var n = 0; ["services", "portfolio", "packages", "testimonials", "faq", "team"].forEach(function (k) { (cfg[k] || []).forEach(function (x) { if (x.sample) n++; }); }); ((cfg.home.hero || {}).stats || []).forEach(function (x) { if (x.sample) n++; }); return n; }
+
+  /* ---------- overview ---------- */
+  function viewOverview(root) {
+    var n = countSamples();
+    root.appendChild(header("🏠", "ওভারভিউ", "ASCII Solutions ওয়েবসাইট ম্যানেজার"));
+    root.appendChild(h("div", { class: "cards" },
+      h("div", { class: "cbox" }, h("h3", {}, serverMode ? "✅ সার্ভারের সাথে যুক্ত" : "⚙️ Setup মোড"), h("p", {}, serverMode ? "লগইন সার্ভারে যাচাই হয়েছে। “প্রকাশ করুন” চাপলেই পরিবর্তন লাইভ সাইটে চলে যাবে, কোনো কোড/ডিপ্লয় লাগবে না।" : "এখনো API লিংক সেট করা নেই। এই অবস্থায় আপনি এডিট করে config.js ডাউনলোড করতে পারবেন। লাইভ প্রকাশ, Leads ও Analytics চালু করতে Setup পেজে Google Sheet যুক্ত করুন।"),
+        h("button", { class: "btn pri", type: "button", onclick: function () { go("setup"); } }, "Google Sheet ও API সেটআপ")),
+      h("div", { class: "cbox" }, h("h3", {}, n ? "⚠️ " + bn(n) + "টি নমুনা কনটেন্ট আছে" : "✅ কোনো নমুনা কনটেন্ট নেই"), h("p", {}, n ? "পরিসংখ্যান, প্রজেক্ট, রিভিউ, টিম ইত্যাদির নমুনা তথ্য লাইভ করার আগে আসল তথ্য দিয়ে বদলান। নমুনা আইটেমে লাল SAMPLE চিহ্ন দেখাবে।" : "সব কনটেন্ট আসল হিসেবে চিহ্নিত।"),
+        h("button", { class: "btn", type: "button", onclick: function () { go("services"); } }, "কনটেন্ট দেখুন"))));
+    var ck = [["ব্র্যান্ড নাম ও লোগো ঠিক আছে", cfg.brand && cfg.brand.name], ["ফোন, WhatsApp ও ইমেইল আসল", cfg.contact && cfg.contact.phone && cfg.contact.phone.indexOf("00000") < 0], ["Facebook Pixel ID দেওয়া হয়েছে (ঐচ্ছিক)", cfg.tracking && cfg.tracking.fbPixelId], ["ওয়েবসাইটের আসল ডোমেইন SEO তে বসানো", cfg.seo && cfg.seo.siteUrl && cfg.seo.siteUrl.indexOf("example") < 0], ["নমুনা কনটেন্ট বদলানো হয়েছে", n === 0], ["Google Sheet/API যুক্ত", !!API]];
+    root.appendChild(h("div", { class: "pg mt" }, h("div", { class: "sub-h" }, "লাইভ করার আগে চেকলিস্ট"), h("ul", { class: "check" }, ck.map(function (c) { return h("li", { class: c[1] ? "ok" : "" }, h("span", {}, c[1] ? "✔" : "○"), c[0]); }))));
+    root.appendChild(h("div", { class: "pg mt" }, h("div", { class: "sub-h" }, "দ্রুত লিংক"), h("div", { class: "qlinks" },
+      [["leads", "📩 Leads দেখুন"], ["analytics", "📊 Analytics"], ["design", "🎨 থিম, রং ও ফন্ট"], ["pagesec", "👁️ সেকশন দেখান/লুকান"], ["seo", "🔎 SEO"], ["tracking", "📈 ট্র্যাকিং"], ["backup", "💾 ব্যাকআপ"]].map(function (q) { return h("button", { class: "btn", type: "button", onclick: function () { go(q[0]); } }, q[1]); }))));
+  }
+
+  /* ---------- home: order & visibility ---------- */
+  function viewHomeOrder(root) {
+    var H = cfg.home;
+    root.appendChild(header("🔀", "হোমপেজের সেকশন", "দেখান/লুকান ও ক্রম বদলান। নামে ক্লিক করলে সেই সেকশন এডিট করা যায়।"));
+    var o = H.order;
+    root.appendChild(h("div", { class: "bulk" },
+      h("button", { class: "btn pri", type: "button", onclick: function () { o.forEach(function (id) { H.show[id] = true; }); dirty(); render(); } }, "👁️ সব দেখান"),
+      h("button", { class: "btn", type: "button", onclick: function () { o.forEach(function (id) { H.show[id] = false; }); dirty(); render(); } }, "🙈 সব লুকান"),
+      h("button", { class: "btn amb", type: "button", onclick: function () { go("pagesec"); } }, "📄 অন্য পেজ ও সাইট-জুড়ে অংশ →")));
+    o.forEach(function (id, i) {
+      var d = HOME[id]; if (!d) return;
+      var on = (H.show || {})[id] !== false;
+      root.appendChild(h("div", { class: "ord-row" + (on ? "" : " off") },
+        h("span", { class: "sec-ic", style: "width:34px;height:34px;font-size:1.05rem" }, d.icon),
+        h("span", { class: "nm", onclick: function () { go("home:" + id); } }, d.name),
+        sw(on, function (v) { H.show[id] = v; dirty(); render(); }),
+        h("button", { class: "ib", type: "button", disabled: i === 0, onclick: function () { if (mv(o, i, -1)) { dirty(); render(); } } }, "↑"),
+        h("button", { class: "ib", type: "button", disabled: i === o.length - 1, onclick: function () { if (mv(o, i, 1)) { dirty(); render(); } } }, "↓")));
+    });
+  }
+
+  /* ---------- other pages + site-wide parts: show / hide ---------- */
+  function viewPageSec(root) {
+    root.appendChild(header("👁️", "সেকশন দেখান / লুকান", "হোমপেজ ছাড়া বাকি পেজের সেকশন ও সাইট-জুড়ে অংশ আলাদাভাবে চালু/বন্ধ করুন"));
+    root.appendChild(h("div", { class: "hint" }, "হোমপেজের ১২টি সেকশনের দেখান/লুকান ও ক্রম বদলাতে “🔀 সেকশনের ক্রম” পেজে যান। প্রতিটি সেকশনের ডাটা বাঁ পাশের মেনু থেকে এডিট হয়।"));
+    var G = [
+      ["🌐 সাইট জুড়ে", [["ui.floaters", "ফ্লোটিং Messenger / WhatsApp / Call বাটন"], ["ui.progress", "পেজের উপরে স্ক্রল প্রগ্রেস বার"], ["ui.headerCta", "হেডারের CTA বাটন"], ["ui.breadcrumbs", "ব্রেডক্রাম্ব (Home / Services …)"], ["ui.footerSocial", "ফুটারে সোশ্যাল আইকন"], ["sheetView.show", "ফর্মের নিচে “ডাটা কীভাবে সেভ হয়” বাটন"]]],
+      ["🛠️ সার্ভিস পেজ", [["pageSections.services.process", "কাজের ধাপ (Process)"], ["pageSections.services.cta", "শেষের CTA বক্স"]]],
+      ["🖼️ পোর্টফোলিও পেজ", [["pageSections.portfolio.cta", "শেষের CTA বক্স"]]],
+      ["🏢 About পেজ", [["pageSections.about.story", "স্টোরি ও মিশন"], ["pageSections.about.values", "মূল্যবোধ"], ["pageSections.about.team", "টিম"], ["pageSections.about.cta", "শেষের CTA বক্স"]]],
+      ["💰 প্রাইসিং পেজ", [["pageSections.pricing.note", "নিচের নোট"], ["pageSections.pricing.faq", "FAQ"], ["pageSections.pricing.cta", "শেষের CTA বক্স"]]]
+    ];
+    G.forEach(function (g) { root.appendChild(box([h("div", { class: "sub-h" }, g[0])].concat(g[1].map(function (x) { return onoff(x[1], x[0], true); })))); });
+  }
+
+  /* ---------- design ---------- */
+  var PRESETS = [
+    ["🔶 Vermilion (ডিফল্ট)", { bg: "#F5F2EA", surface: "#FFFFFF", ink: "#0E1116", muted: "#5B6270", line: "#E2DDD0", accent: "#FF5A36", accentInk: "#0E1116", dark: "#0E1116", darkSoft: "#171B24" }],
+    ["🟣 Indigo Night", { bg: "#F4F4FB", surface: "#FFFFFF", ink: "#11122B", muted: "#5A5C7A", line: "#DEDFF0", accent: "#6C5CFF", accentInk: "#FFFFFF", dark: "#11122B", darkSoft: "#1B1D3F" }],
+    ["🟢 Emerald", { bg: "#F1F6F2", surface: "#FFFFFF", ink: "#0B1F17", muted: "#52645A", line: "#D9E5DC", accent: "#12B76A", accentInk: "#06281A", dark: "#0B1F17", darkSoft: "#12302A" }],
+    ["🟡 Gold & Black", { bg: "#FAF7F0", surface: "#FFFFFF", ink: "#14110B", muted: "#6B6455", line: "#E9E2D0", accent: "#F5B301", accentInk: "#14110B", dark: "#14110B", darkSoft: "#211C10" }],
+    ["💗 Magenta Pop", { bg: "#FFF5F8", surface: "#FFFFFF", ink: "#1D0A14", muted: "#6E5560", line: "#F0DAE2", accent: "#E8236B", accentInk: "#FFFFFF", dark: "#1D0A14", darkSoft: "#2C1220" }],
+    ["🌊 Ocean Blue", { bg: "#F1F7FB", surface: "#FFFFFF", ink: "#08202E", muted: "#4F6672", line: "#D7E5EE", accent: "#0A8DFF", accentInk: "#FFFFFF", dark: "#08202E", darkSoft: "#0F3145" }]
+  ];
+  var FONT_HEAD = ["Space Grotesk", "Sora", "Outfit", "Plus Jakarta Sans", "Manrope", "Playfair Display", "DM Serif Display"];
+  var FONT_BODY = ["Inter", "DM Sans", "Nunito Sans", "Poppins", "Manrope"];
+  function viewDesign(root) {
+    var T = cfg.theme = cfg.theme || {};
+    root.appendChild(header("🎨", "রং, থিম ও লেআউট", "পুরো ওয়েবসাইটের ডিজাইন স্ট্রাকচার, রং ও ফন্ট এক জায়গা থেকে"));
+    var SVG1 = '<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="130" fill="#F5F2EA"/><rect width="200" height="14" fill="#fff"/><rect x="8" y="5" width="26" height="4" rx="2" fill="#0E1116"/><rect x="118" y="5" width="14" height="4" rx="2" fill="#bbb"/><rect x="138" y="5" width="14" height="4" rx="2" fill="#bbb"/><rect x="168" y="4" width="24" height="6" rx="3" fill="#FF5A36"/><rect x="10" y="26" width="84" height="9" rx="2" fill="#0E1116"/><rect x="10" y="39" width="64" height="9" rx="2" fill="#FF5A36"/><rect x="10" y="54" width="70" height="4" rx="2" fill="#aaa"/><rect x="10" y="64" width="26" height="9" rx="4.5" fill="#FF5A36"/><rect x="120" y="24" width="70" height="52" rx="8" fill="#e8e2d2"/><rect x="10" y="86" width="56" height="34" rx="6" fill="#fff" stroke="#ddd"/><rect x="72" y="86" width="56" height="34" rx="6" fill="#0E1116"/><rect x="134" y="86" width="56" height="34" rx="6" fill="#fff" stroke="#ddd"/></svg>';
+    var SVG2 = '<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="130" fill="#F5F2EA"/><rect x="28" y="4" width="144" height="13" rx="6.5" fill="#fff" stroke="#ddd"/><rect x="36" y="9" width="18" height="4" rx="2" fill="#0E1116"/><rect x="78" y="9" width="44" height="4" rx="2" fill="#bbb"/><rect x="148" y="8" width="18" height="6" rx="3" fill="#FF5A36"/><rect x="45" y="26" width="110" height="8" rx="2" fill="#0E1116"/><rect x="60" y="38" width="80" height="8" rx="2" fill="#FF5A36"/><rect x="72" y="51" width="56" height="4" rx="2" fill="#aaa"/><rect x="76" y="60" width="22" height="7" rx="3" fill="#FF5A36"/><rect x="102" y="60" width="22" height="7" rx="3" fill="none" stroke="#0E1116"/><rect x="14" y="74" width="172" height="24" rx="8" fill="#fff" stroke="#ddd"/><rect x="14" y="104" width="172" height="4" fill="#0E1116" opacity=".7"/><rect x="14" y="112" width="172" height="1" fill="#ccc"/><rect x="14" y="118" width="172" height="1" fill="#ccc"/></svg>';
+    function layCard(id, title, desc, svg) {
+      var on = (cfg.layout || "t1") === id, art = h("div", { class: "lay-art" }); art.innerHTML = svg;
+      return h("button", { class: "lay" + (on ? " on" : ""), type: "button", onclick: function () { cfg.layout = id; dirty(); render(); toast(title + " চালু হয়েছে – প্রকাশ করুন", "ok"); } }, art, h("b", {}, title), h("small", {}, desc), on ? h("span", { class: "tick" }, "✔ চালু") : null);
+    }
+    root.appendChild(box([h("div", { class: "sub-h" }, "ডিজাইন স্ট্রাকচার (থিম)"), h("div", { class: "hint" }, "দুটি থিমে কনটেন্ট একই থাকে, শুধু সেকশনের গঠন/লেআউট আলাদা দেখায়। থিম-১ বর্তমান ডিফল্ট ডিজাইন।"),
+      h("div", { class: "laywrap" }, layCard("t1", "থিম-১ (ডিফল্ট)", "বাঁ-ডান হিরো, বেন্টো সার্ভিস কার্ড, সাধারণ হেডার ও ফুটার", SVG1), layCard("t2", "থিম-২", "মাঝখানের হিরো, ভাসমান পিল হেডার, নম্বর দেওয়া সার্ভিস লিস্ট, হরিজন্টাল পোর্টফোলিও, বক্স CTA", SVG2))]));
+    var pr = h("div", { class: "preset" });
+    PRESETS.forEach(function (p) {
+      var strip = h("div", { class: "sw-strip" }, ["bg", "ink", "accent", "dark"].map(function (k) { var i = h("i", {}); i.style.background = p[1][k]; return i; }));
+      pr.appendChild(h("button", { class: "pbtn", type: "button", onclick: function () { Object.keys(p[1]).forEach(function (k) { T[k] = p[1][k]; }); dirty(); render(); toast("থিম বসানো হয়েছে", "ok"); } }, p[0], strip));
+    });
+    root.appendChild(box([h("div", { class: "sub-h" }, "তৈরি থিম"), pr]));
+    var cols = [["bg", "পেজের ব্যাকগ্রাউন্ড"], ["surface", "কার্ড/ফর্মের ব্যাকগ্রাউন্ড"], ["ink", "মূল লেখা ও গাঢ় বাটন"], ["muted", "হালকা লেখা"], ["line", "বর্ডার/লাইন"], ["accent", "অ্যাকসেন্ট (বাটন, হাইলাইট)"], ["accentInk", "অ্যাকসেন্টের উপরের লেখা"], ["dark", "গাঢ় সেকশনের ব্যাকগ্রাউন্ড"], ["darkSoft", "গাঢ় সেকশনের কার্ড"]];
+    var grid = h("div", { class: "colr" }); cols.forEach(function (c) { grid.appendChild(colorField(c[1], "theme." + c[0])); });
+    root.appendChild(box([h("div", { class: "sub-h" }, "প্রতিটি রং"), grid]));
+    root.appendChild(box([h("div", { class: "sub-h" }, "কর্নার ও বাটনের আকার"), h("div", { class: "row2" }, field("কার্ড/ইমেজের কর্নার রেডিয়াস (px, ০–৪০)", "theme.radius", { num: true, hint: "ডিফল্ট ২২। ০ দিলে কোণা চৌকো হবে" }), selField("বাটনের আকার", "theme.btnShape", [["pill", "গোল (Pill)"], ["round", "হালকা গোল"], ["square", "চৌকো"]]))]));
+    root.appendChild(box([h("div", { class: "sub-h" }, "ফন্ট"), h("div", { class: "row2" }, selField("হেডিং ফন্ট", "theme.fontHead", FONT_HEAD), selField("বডি ফন্ট", "theme.fontBody", FONT_BODY)),
+      h("div", { class: "hint" }, "Space Grotesk ও Inter আমাদের নিজস্ব সার্ভার থেকে লোড হয় (দ্রুত)। বাকি ফন্ট Google Fonts থেকে লোড হয়। বাংলা লেখার জন্য Hind Siliguri স্বয়ংক্রিয়ভাবে ফলব্যাক হিসেবে কাজ করে।")]));
+  }
+
+  /* ---------- SEO ---------- */
+  var SEO_PAGES = [["home", "হোম"], ["services", "সার্ভিস"], ["portfolio", "পোর্টফোলিও"], ["about", "About"], ["pricing", "প্রাইসিং"], ["contact", "Contact"], ["privacy", "Privacy"], ["terms", "Terms"], ["notfound", "404"]];
+  function viewSeo(root) {
+    root.appendChild(header("🔎", "SEO সেটিংস", "প্রতিটি পেজের টাইটেল, বর্ণনা ও সোশ্যাল ছবি"));
+    var site = [{ t: "text", k: "seo.siteUrl", l: "ওয়েবসাইটের আসল ডোমেইন", ph: "https://yourdomain.com", hint: "canonical লিংক, sitemap ও সোশ্যাল প্রিভিউতে ব্যবহার হয়" }, { t: "text", k: "seo.siteName", l: "সাইটের নাম" }, { t: "img", k: "seo.ogImage", l: "ডিফল্ট সোশ্যাল শেয়ার ছবি (1200×630, JPG/PNG)", folder: "og" }];
+    root.appendChild(box([h("div", { class: "sub-h" }, "পুরো সাইট")].concat([build(h("div", {}), site, "")])));
+    SEO_PAGES.forEach(function (p) {
+      root.appendChild(box([h("div", { class: "sub-h" }, p[1] + " পেজ"), build(h("div", {}), [{ t: "text", k: "title", l: "টাইটেল (সর্বোচ্চ ~৬০ অক্ষর)", count: 60 }, { t: "area", k: "description", l: "বর্ণনা (সর্বোচ্চ ~১৬০ অক্ষর)", rows: 2, count: 160 }, { t: "img", k: "image", l: "সোশ্যাল ছবি (ঐচ্ছিক)", folder: "og" }], "seo.pages." + p[0])]));
+    });
+    root.appendChild(h("div", { class: "hint" }, "ℹ️ টাইটেল ও বর্ণনা প্রকাশের পর সাথে সাথে ব্রাউজারে বদলায়। সার্চ ইঞ্জিন/সোশ্যাল প্রিভিউয়ের জন্য স্ট্যাটিক HTML আপডেট হয় পরের ডিপ্লয়ে (Vercel নিজে node build.js চালায়)।"));
+  }
+
+  /* ---------- leads ---------- */
+  function viewLeads(root) {
+    root.appendChild(header("📩", "Leads", "কন্টাক্ট ফর্মের সব বার্তা (গুগল শিটের Leads ট্যাব থেকে)"));
+    if (!serverMode) { root.appendChild(box([h("div", { class: "err-box" }, "Leads দেখতে Google Sheet/API যুক্ত করে সার্ভার-লগইন করতে হবে (Setup পেজ)।")])); return; }
+    var q = h("input", { type: "search", placeholder: "নাম, ফোন, ইমেইল বা বার্তায় খুঁজুন…" }), st = h("select", {}, ["", "New", "Contacted", "Won", "Lost"].map(function (s) { return h("option", { value: s }, s || "সব স্ট্যাটাস"); }));
+    var list = h("div", {}), data = [];
+    var bar = h("div", { class: "lbar" }, q, st, h("button", { class: "btn pri", type: "button", onclick: load }, "🔄 রিফ্রেশ"), h("button", { class: "btn", type: "button", onclick: function () { csv(); } }, "⬇️ CSV"));
+    root.appendChild(bar); root.appendChild(h("div", { class: "cnt-line", id: "leadCnt" })); root.appendChild(list);
+    function match(l) { var s = q.value.trim().toLowerCase(); if (st.value && l.status !== st.value) return false; if (!s) return true; return [l.name, l.phone, l.email, l.company, l.message, l.interest, l.id].join(" ").toLowerCase().indexOf(s) > -1; }
+    function csv() {
+      var rows = [["Lead ID", "Date", "Name", "Phone", "Email", "Company", "Service", "Budget", "Package", "Source", "Status", "Message", "Notes"]].concat(data.filter(match).map(function (l) { return [l.id, l.date, l.name, l.phone, l.email, l.company, l.interest, l.budget, l.pkg, l.source, l.status, l.message, l.note]; }));
+      var t = rows.map(function (r) { return r.map(function (c) { c = String(c == null ? "" : c).replace(/"/g, '""'); if (/^[=+\-@]/.test(c)) c = "'" + c; return '"' + c + '"'; }).join(","); }).join("\n");
+      download("leads.csv", "\ufeff" + t, "text/csv");
+    }
+    function draw() {
+      list.textContent = ""; var shown = data.filter(match);
+      $("#leadCnt").textContent = shown.length + " টি দেখানো হচ্ছে (মোট " + data.length + ")";
+      if (!shown.length) { list.appendChild(h("div", { class: "empty" }, "কোনো Lead পাওয়া যায়নি")); return; }
+      shown.forEach(function (l) {
+        var sel = h("select", { class: "st " + l.status }, ["New", "Contacted", "Won", "Lost"].map(function (s) { var o = h("option", { value: s }, s); if (s === l.status) o.selected = true; return o; }));
+        sel.onchange = function () { var prev = l.status, nv = sel.value; sel.disabled = true; api("setLeadStatus", { leadId: l.id, status: nv }).then(function (r) { if (!r.success) throw new Error(r.error); l.status = nv; sel.className = "st " + nv; toast("স্ট্যাটাস আপডেট হয়েছে", "ok"); }).catch(function (e) { sel.value = prev; toast(e.message, "bad"); }).then(function () { sel.disabled = false; }); };
+        var note = h("textarea", { rows: 2, placeholder: "ইন্টারনাল নোট…" }); note.value = l.note || "";
+        note.onblur = function () { if (note.value === (l.note || "")) return; api("setLeadNote", { leadId: l.id, note: note.value }).then(function (r) { if (!r.success) throw new Error(r.error); l.note = note.value; toast("নোট সেভ হয়েছে", "ok"); }).catch(function (e) { toast(e.message, "bad"); }); };
+        var ph = String(l.phone || "").replace(/[^\d+]/g, ""), wa = ph.replace(/^\+/, "").replace(/^0/, "880");
+        list.appendChild(h("div", { class: "ord" },
+          h("div", { class: "ord-h" }, h("div", {}, h("b", {}, l.name), h("br"), h("small", {}, l.id + " · " + l.date)), sel),
+          h("div", { class: "ord-b" },
+            h("div", {}, h("span", {}, "ফোন"), h("a", { href: "tel:" + ph }, l.phone), " · ", h("a", { href: "https://wa.me/" + wa, target: "_blank", rel: "noopener" }, "WhatsApp")),
+            h("div", {}, h("span", {}, "ইমেইল"), l.email ? h("a", { href: "mailto:" + l.email }, l.email) : "—"),
+            h("div", {}, h("span", {}, "কোম্পানি"), l.company || "—"), h("div", {}, h("span", {}, "সার্ভিস / বাজেট"), (l.interest || "—") + " / " + (l.budget || "—")),
+            h("div", {}, h("span", {}, "প্যাকেজ"), l.pkg || "—"), h("div", {}, h("span", {}, "সোর্স"), (l.source || "—") + " · " + (l.page || "")),
+            h("div", { class: "full" }, h("span", {}, "বার্তা"), h("pre", {}, l.message)),
+            h("div", { class: "full" }, h("span", {}, "নোট"), note))));
+      });
+    }
+    function load() { list.textContent = ""; list.appendChild(h("div", { class: "empty" }, h("span", { class: "spinner" }), "লোড হচ্ছে…")); api("listLeads", { limit: 500 }).then(function (d) { if (!d.success) throw new Error(d.error); data = d.leads; draw(); }).catch(function (e) { list.textContent = ""; list.appendChild(h("div", { class: "err-box" }, e.message)); }); }
+    q.oninput = draw; st.onchange = draw; load();
+  }
+
+  /* ---------- analytics ---------- */
+  function viewAnalytics(root) {
+    root.appendChild(header("📊", "Analytics", "User Activity ও Leads শিট থেকে হিসাব করা"));
+    if (!serverMode) { root.appendChild(box([h("div", { class: "err-box" }, "Analytics দেখতে Google Sheet/API যুক্ত করে সার্ভার-লগইন করতে হবে (Setup পেজ)।")])); return; }
+    var days = h("select", {}, [7, 30, 90].map(function (d) { var o = h("option", { value: d }, "গত " + d + " দিন"); if (d === 30) o.selected = true; return o; }));
+    var out = h("div", {}); root.appendChild(h("div", { class: "lbar" }, days, h("button", { class: "btn pri", type: "button", onclick: load }, "🔄 রিফ্রেশ"))); root.appendChild(out);
+    function bars(title, pairs, color) {
+      var max = Math.max.apply(null, pairs.map(function (p) { return p[1]; }).concat([1]));
+      return h("div", { class: "cbox" }, h("h3", {}, title), pairs.length ? pairs.map(function (p) { var b = h("i", {}); b.style.width = (p[1] / max * 100) + "%"; if (color) b.style.background = color; return h("div", { class: "bar" }, h("span", {}, p[0]), h("div", { class: "bar-t" }, b), h("b", {}, String(p[1]))); }) : h("p", {}, "ডাটা নেই"));
+    }
+    function draw(a) {
+      out.textContent = "";
+      var s = Math.floor(a.avgSecs / 60) + "m " + (a.avgSecs % 60) + "s";
+      out.appendChild(h("div", { class: "stats" }, [["ভিজিটর", a.visits], ["Leads", a.funnel.leads], ["কনভার্সন", a.conversion + "%"], ["গড় সময়", s], ["গড় স্ক্রল", a.avgScroll + "%"], ["CTA ক্লিক", a.ctaClicks]].map(function (x) { return h("div", { class: "stat" }, h("b", {}, String(x[1])), h("span", {}, x[0])); })));
+      var f = a.funnel;
+      out.appendChild(h("div", { class: "cards" }, bars("🔻 ফানেল", [["ভিজিটর", f.visits], ["Contact সেকশন দেখেছে", f.contact], ["ফর্ম শুরু করেছে", f.formStart], ["Lead জমা দিয়েছে", f.leads]], "var(--green)"),
+        bars("📜 স্ক্রল গভীরতা", Object.keys(a.scrollBuckets).map(function (k) { return [k, a.scrollBuckets[k]]; }), "#7C3AED")));
+      var maxV = Math.max.apply(null, a.daily.map(function (d) { return d.visits; }).concat([1]));
+      out.appendChild(h("div", { class: "cbox mt" }, h("h3", {}, "📅 দিন অনুযায়ী ভিজিটর ও Leads"), h("div", { class: "daily" }, a.daily.map(function (d) { var c = h("div", { class: "dcol", title: d.d + ": " + d.visits + " ভিজিটর, " + d.leads + " Lead" }); var b = h("i", {}); b.style.height = Math.max(2, d.visits / maxV * 100) + "%"; c.appendChild(b); if (d.leads) c.appendChild(h("em", {}, String(d.leads))); return c; })), h("p", { class: "legend" }, "কালো = ভিজিটর · সংখ্যা = সেদিনের Leads")));
+      out.appendChild(h("div", { class: "cards mt" }, bars("🌐 শীর্ষ সোর্স", a.topSources, "#1E40AF"), bars("📱 ডিভাইস", a.devices, "#059669"), bars("🎯 সার্ভিস আগ্রহ (Leads)", a.interests, "#E8590C"), bars("🏷️ Lead স্ট্যাটাস", Object.keys(a.status).map(function (k) { return [k, a.status[k]]; }), "#64748B")));
+      out.appendChild(h("div", { class: "hint mt" }, "ℹ️ এটি বেনামী তথ্য: কোনো নাম/ফোন/ইমেইল ট্র্যাক হয় না। “Do Not Track” চালু থাকা ভিজিটর গণনায় আসে না, তাই সংখ্যা আসল ভিজিটরের চেয়ে কিছু কম হতে পারে।"));
+    }
+    function load() { out.textContent = ""; out.appendChild(h("div", { class: "empty" }, h("span", { class: "spinner" }), "হিসাব হচ্ছে…")); api("analytics", { days: Number(days.value) }).then(function (d) { if (!d.success) throw new Error(d.error); draw(d.data); }).catch(function (e) { out.textContent = ""; out.appendChild(h("div", { class: "err-box" }, e.message)); }); }
+    days.onchange = load; load();
+  }
+
+  /* ---------- setup: Sheet + API + Code.gs generator ---------- */
+  function sheetId(v) { v = String(v || "").trim(); var m = v.match(/\/d\/([a-zA-Z0-9_-]+)/); if (m) return m[1]; return /^[a-zA-Z0-9_-]{25,}$/.test(v) ? v : ""; }
+  function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function randHex(n) { var a = new Uint8Array(n); (window.crypto || window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a, function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""); }
+  function genCode(pw) {
+    var id = sheetId(lsGet("hn_adm_sheet")); if (!id) return { err: "আগে সঠিক Google Sheet লিংক দিন" };
+    if (!pw || pw.length < 8) return { err: "অ্যাডমিন পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের দিন" };
+    var salt = randHex(12), hash = sha256(salt + ":" + pw), site = String(lsGet("hn_adm_site") || "").trim().replace(/\/+$/, "");
+    var code = CODE_TPL.replace(/var SPREADSHEET_ID = ".*?";/, 'var SPREADSHEET_ID = "' + id + '";').replace(/var SITE_URL = ".*?";/, 'var SITE_URL = "' + site + '";').replace(/var ADMIN_SALT = ".*?";/, 'var ADMIN_SALT = "' + salt + '";').replace(/var ADMIN_HASH = ".*?";/, 'var ADMIN_HASH = "' + hash + '";');
+    return { code: code };
+  }
+  function fallbackCopy(t) { var ta = h("textarea", {}); ta.value = t; ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.remove(); }
+  function viewSetup(root) {
+    if (!lsGet("hn_adm_site") && /^https?:/.test(location.protocol)) lsSet("hn_adm_site", location.origin);
+    root.appendChild(header("📊", "Google Sheet, পাসওয়ার্ড ও API", "একবার সেটআপ করলেই Leads, Analytics ও লাইভ প্রকাশ চালু হবে"));
+    var pg = h("div", { class: "pg" });
+    var sIn = h("input", { type: "text", placeholder: "https://docs.google.com/spreadsheets/d/…/edit" }); sIn.value = lsGet("hn_adm_sheet");
+    var sMsg = h("small", {}); function chk() { var id = sheetId(sIn.value); sMsg.textContent = !sIn.value ? "শুধু এই ডিভাইসে থাকে, ওয়েবসাইটে যায় না" : (id ? "✅ শিট আইডি পাওয়া গেছে (" + String(id).slice(0, 12) + "…) – Code.gs এ স্বয়ংক্রিয়ভাবে যুক্ত হবে" : "⚠️ সঠিক গুগল শিটের লিংক দিন"); }
+    sIn.oninput = function () { lsSet("hn_adm_sheet", sIn.value.trim()); chk(); }; chk();
+    pg.appendChild(h("div", { class: "fld" }, h("label", {}, "১. আপনার Google Sheet এর লিংক (আলাদা, প্রাইভেট শিট ব্যবহার করুন)"), sIn, sMsg));
+    var uIn = h("input", { type: "text", placeholder: "https://yourdomain.com" }); uIn.value = lsGet("hn_adm_site"); uIn.oninput = function () { lsSet("hn_adm_site", uIn.value.trim()); };
+    pg.appendChild(h("div", { class: "fld" }, h("label", {}, "২. ওয়েবসাইটের লিংক"), uIn, h("small", {}, "ঐচ্ছিক: Orders পুরোনো ফ্লো-র দাম যাচাইয়ের জন্য")));
+    var pIn = h("input", { type: "password", placeholder: "কমপক্ষে ৮ অক্ষর", autocomplete: "new-password" });
+    pg.appendChild(h("div", { class: "fld" }, h("label", {}, "৩. অ্যাডমিন পাসওয়ার্ড বেছে নিন"), pIn, h("small", {}, "পাসওয়ার্ড কোথাও সেভ হয় না। শুধু এর SHA-256 হ্যাশ Code.gs এ বসে; লগইন যাচাই হয় সার্ভারে (Apps Script)।")));
+    pg.appendChild(h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-top:14px" },
+      h("button", { class: "btn pri", type: "button", onclick: function () { var r = genCode(pIn.value); if (r.err) { toast(r.err, "bad"); return; } var done = function () { toast("✅ Code.gs কপি হয়েছে – Apps Script এ পেস্ট করুন", "ok"); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(r.code).then(done, function () { fallbackCopy(r.code); done(); }); else { fallbackCopy(r.code); done(); } } }, "📋 Code.gs কপি করুন"),
+      h("button", { class: "btn amb", type: "button", onclick: function () { var r = genCode(pIn.value); if (r.err) { toast(r.err, "bad"); return; } download("Code.gs", r.code, "text/plain"); } }, "⬇️ Code.gs ডাউনলোড")));
+    pg.appendChild(h("div", { class: "sub-h", style: "margin-top:20px" }, "৪. Apps Script এ কী করবেন"));
+    pg.appendChild(h("ol", { class: "steps" },
+      h("li", {}, "Google Sheet খুলুন ➔ ", h("b", {}, "Extensions ➔ Apps Script")), h("li", {}, "আগের কোড মুছে কপি করা কোড পেস্ট করুন ➔ Save 💾"),
+      h("li", {}, h("code", {}, "setupAll"), " সিলেক্ট করে ▶ Run (Permission দিন, Drive ও Sheets অনুমতি লাগবে) – Leads, User Activity, Pixel Events, Report, Dashboard, Settings ট্যাব তৈরি হবে"),
+      h("li", {}, h("b", {}, "Deploy ➔ New deployment ➔ Web app"), " (Execute as: Me, Who has access: Anyone) ➔ Deploy"), h("li", {}, "পাওয়া ", h("code", {}, "/exec"), " লিংক নিচের ঘরে বসান, তারপর ⬇️ config.js নামিয়ে প্রজেক্টে রেখে push করুন")));
+    root.appendChild(pg);
+    var aMsg = h("small", { class: "vmsg" });
+    function apiChk(v) { v = String(v || "").trim(); if (!v) { aMsg.textContent = ""; aMsg.className = "vmsg"; return; } var okk = /^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]+\/exec$/.test(v); aMsg.className = "vmsg " + (okk ? "ok" : "bad"); aMsg.textContent = okk ? "✅ সঠিক Apps Script Web App API লিংক! Lead সরাসরি আপনার গুগল শিটে জমা হবে।" : "⚠️ লিংকটি https://script.google.com/macros/s/…/exec ধরনের হতে হবে (শেষে /exec)।"; }
+    var api2 = field("৫. API লিংক (Apps Script /exec)", "apiEndpoint", { onchange: apiChk, ph: "https://script.google.com/macros/s/…/exec", hint: "এটি config.js এ যায়। এই লিংক বসিয়ে config.js ডাউনলোড ও push করলে সাইটের ফর্ম ও লাইভ কনটেন্ট চালু হবে।" });
+    var testOut = h("div", { class: "mt" });
+    apiChk(cfg.apiEndpoint);
+    root.appendChild(h("div", { class: "pg mt" }, api2, aMsg, h("button", { class: "btn", type: "button", onclick: function () {
+      var u = cfg.apiEndpoint; if (!u) { toast("আগে API লিংক বসান", "bad"); return; }
+      testOut.textContent = "পরীক্ষা হচ্ছে…";
+      fetch(u + (u.indexOf("?") > -1 ? "&" : "?") + "action=config", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) { testOut.textContent = d && d.success ? "✅ API চালু আছে (প্রকাশিত রিভিশন: " + d.rev + ")" : "⚠️ API উত্তর দিয়েছে কিন্তু সফল নয়"; }).catch(function () { testOut.textContent = "❌ API তে পৌঁছানো যায়নি। Deploy সেটিংস (Anyone) ও লিংক ঠিক আছে কিনা দেখুন।"; });
+    } }, "🔌 সংযোগ পরীক্ষা করুন"), testOut));
+    root.appendChild(h("div", { class: "hint mt" }, h("b", {}, "🔒 গোপনীয়তা: "), "Leads শিটে ফোন/ইমেইল থাকে। শিটটি কখনো “Anyone with the link” করবেন না। শুধু আপনার Google অ্যাকাউন্টে রাখুন।"));
+    var pv = h("div", { class: "pg mt" }, h("div", { class: "sub-h" }, "🔒 কাস্টমার প্রাইভেসি ও গুগল শিটের লিংক প্রদর্শন"),
+      h("div", { class: "warnbox" }, h("b", {}, "⚠️ নিরাপত্তা পরামর্শ: "), "আসল Leads শিটের লিংক ওয়েবসাইটে কখনো দেবেন না। ফর্মের বাটনে চাপলে ভিজিটর নিজের লেখা ডাটা একটি নমুনা শিট-সারিতে (লাইভ প্রিভিউ) দেখে, কিছু পাঠানো হয় না। চাইলে নিচে একটি আলাদা ডেমো শিটের লিংক দিতে পারেন।"),
+      onoff("ওয়েবসাইটের ফর্মের নিচে “ডাটা কীভাবে সেভ হয় – লাইভ দেখুন” বাটন দেখান", "sheetView.show", true),
+      onoff("ফর্ম সফল হওয়ার পর সফল মেসেজে ডেমো শিটের লিংক দেখান", "sheetView.successLink", false),
+      h("div", { class: "row2", style: "margin-top:12px" }, field("বাটনের লেখা", "sheetView.button", { ph: "See how your data is saved" }), field("মডালের টাইটেল", "sheetView.title", { ph: "How your details are saved" })),
+      field("মডালের ব্যাখ্যা", "sheetView.note", { multi: true, rows: 2 }),
+      h("div", { class: "row2" }, field("ডেমো শিটের লিংক (ঐচ্ছিক, আলাদা পাবলিক ডেমো শিট)", "sheetView.demoUrl", { ph: "https://docs.google.com/spreadsheets/d/…", hint: "শুধু https://docs.google.com/ লিংক চলবে। খালি রাখলে লিংক দেখাবে না।" }), field("লিংকের লেখা", "sheetView.linkText", { ph: "Open a sample sheet" })));
+    root.appendChild(pv);
+  }
+
+  /* ---------- backup ---------- */
+  function viewBackup(root) {
+    root.appendChild(header("💾", "ব্যাকআপ", "সেটিংস ফাইলে সংরক্ষণ বা ফেরত আনা"));
+    var file = h("input", { type: "file", accept: ".json,application/json", hidden: true });
+    file.onchange = function () { var f = file.files[0]; if (!f) return; var r = new FileReader(); r.onload = function () { try { cfg = merge(clone(DEF), JSON.parse(r.result)); fixCfg(); dirty(); render(); toast("ব্যাকআপ লোড হয়েছে – এখন প্রকাশ করুন", "ok"); } catch (e) { toast("ফাইলটি সঠিক নয়", "bad"); } }; r.readAsText(f); };
+    root.appendChild(h("div", { class: "cards" },
+      h("div", { class: "cbox" }, h("h3", {}, "💾 ব্যাকআপ ডাউনলোড (.json)"), h("p", {}, "সব কনটেন্ট ও সেটিংস একটি ফাইলে।"), h("button", { class: "btn pri", type: "button", onclick: function () { download("ascii-site-backup.json", JSON.stringify(pubPayload(), null, 2), "application/json"); } }, "ডাউনলোড")),
+      h("div", { class: "cbox" }, h("h3", {}, "📥 ব্যাকআপ থেকে ফেরত আনুন"), h("p", {}, "ব্যাকআপ ফাইল বাছুন, তারপর প্রকাশ করুন।"), h("button", { class: "btn", type: "button", onclick: function () { file.click(); } }, "ফাইল বাছুন"), file),
+      h("div", { class: "cbox" }, h("h3", {}, "⬇️ config.js (কমিট করার জন্য)"), h("p", {}, "বর্তমান সব কনটেন্ট দিয়ে config.js। এটি js/ ফোল্ডারে বসিয়ে push করলে ডিপ্লয়ে স্ট্যাটিক পেজ নিজে তৈরি হয়।"), h("button", { class: "btn amb", type: "button", onclick: exportFiles }, "ডাউনলোড")),
+      h("div", { class: "cbox" }, h("h3", {}, "♻️ অপ্রকাশিত পরিবর্তন বাতিল"), h("p", {}, "প্রকাশিত অবস্থায় ফিরে যান।"), h("button", { class: "btn danger", type: "button", onclick: function () { if (!confirm("সব অপ্রকাশিত পরিবর্তন মুছে ফেলবেন?")) return; try { localStorage.removeItem(DKEY); } catch (e) {} pending = {}; if (serverMode) enter(true); else { cfg = clone(DEF); fixCfg(); isDirty = false; status(); render(); } } }, "বাতিল করুন"))));
+  }
+
+  /* ---------- navigation ---------- */
+  var GROUPS = [
+    ["কনটেন্ট", [["services", "services"], ["portfolio", "portfolio"], ["packages", "packages"], ["testimonials", "testimonials"], ["faq", "faq"], ["team", "team"]], PAGES],
+    ["অন্যান্য পেজ", [["about", "about"], ["contactPage", "contactPage"], ["privacy", "privacy"], ["terms", "terms"], ["notfound", "notfound"]], PAGES],
+    ["সাইট জুড়ে", [["brand", "brand"], ["nav", "nav"], ["footer", "footer"], ["contact", "contact"], ["form", "form"], ["texts", "texts"], ["pagesec", "pagesec", "👁️", "সেকশন দেখান/লুকান"], ["design", "design", "🎨", "রং, থিম ও লেআউট"], ["seo", "seo", "🔎", "SEO"], ["tracking", "tracking"]], SITE],
+    ["ডাটা", [["leads", "leads", "📩", "Leads"], ["analytics", "analytics", "📊", "Analytics"]], null],
+    ["সেটআপ", [["setup", "setup", "⚙️", "Sheet, পাসওয়ার্ড ও API"], ["backup", "backup", "💾", "ব্যাকআপ"]], null]
+  ];
+  function go(p) { page = p; closeMenu(); render(); window.scrollTo(0, 0); }
+  function closeMenu() { $("#side").classList.remove("open"); $("#scrim").classList.remove("show"); }
+  function renderSide() {
+    var s = $("#side"); s.textContent = "";
+    function item(id, ic, name, dot) { return h("button", { class: "si" + (page === id ? " on" : ""), type: "button", onclick: function () { go(id); } }, h("span", { class: "ic" }, ic), h("span", { class: "tx" }, name), dot === undefined ? null : h("span", { class: "dot" + (dot ? "" : " off") })); }
+    s.appendChild(h("div", { class: "side-h" }, "🖥️ ASCII Admin"));
+    s.appendChild(item("overview", "🏠", "ওভারভিউ"));
+    s.appendChild(h("div", { class: "side-grp" }, "হোমপেজের সেকশন"));
+    cfg.home.order.forEach(function (id) { var d = HOME[id]; if (d) s.appendChild(item("home:" + id, d.icon, d.name, cfg.home.show[id] !== false)); });
+    s.appendChild(item("homeorder", "🔀", "সেকশনের ক্রম ও দেখান/লুকান"));
+    GROUPS.forEach(function (g) {
+      s.appendChild(h("div", { class: "side-grp" }, g[0]));
+      g[1].forEach(function (x) { var d = g[2] ? g[2][x[1]] : null; s.appendChild(item(x[0], x[2] || (d && d.icon), x[3] || (d && d.name))); });
+    });
+    s.appendChild(h("div", { class: "side-grp" }, "অ্যাকাউন্ট"));
+    s.appendChild(h("button", { class: "si", type: "button", onclick: function () { doLogout(false); } }, h("span", { class: "ic" }, "⎋"), h("span", { class: "tx" }, "লগআউট")));
+  }
+  function render() {
+    if (!cfg) return;
+    renderSide();
+    var main = $("#main"); main.textContent = "";
+    if (page.indexOf("home:") === 0) {
+      var id = page.slice(5), d = HOME[id];
+      if (d) {
+        var on = cfg.home.show[id] !== false;
+        main.appendChild(header(d.icon, d.name, d.desc, sw(on, function (v) { cfg.home.show[id] = v; dirty(); renderSide(); }, on ? "দেখাচ্ছে" : "লুকানো")));
+        main.appendChild(box([build(h("div", {}), d.spec, d.path)])); return;
+      }
+    }
+    if (page === "overview") return viewOverview(main);
+    if (page === "homeorder") return viewHomeOrder(main);
+    if (page === "design") return viewDesign(main);
+    if (page === "pagesec") return viewPageSec(main);
+    if (page === "seo") return viewSeo(main);
+    if (page === "leads") return viewLeads(main);
+    if (page === "analytics") return viewAnalytics(main);
+    if (page === "setup") return viewSetup(main);
+    if (page === "backup") return viewBackup(main);
+    var d2 = PAGES[page] || SITE[page];
+    if (d2) { main.appendChild(header(d2.icon, d2.name, d2.desc)); main.appendChild(box([build(h("div", {}), d2.spec, "")])); return; }
+    viewOverview(main);
+  }
+
+  /* ---------- validate, publish, export ---------- */
+  function validate() {
+    var seen = {}, i, x;
+    for (var k = 0; k < 2; k++) {
+      var key = k ? "portfolio" : "services";
+      seen = {};
+      for (i = 0; i < (cfg[key] || []).length; i++) {
+        x = cfg[key][i];
+        if (!String(x.title || "").trim()) return (k ? "প্রজেক্ট" : "সার্ভিস") + " #" + (i + 1) + " এর নাম দিন।";
+        if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(x.slug || "")) return "“" + x.title + "” এর URL নাম শুধু ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও - দিয়ে হতে হবে।";
+        if (seen[x.slug]) return "URL নাম “" + x.slug + "” ডুপ্লিকেট।"; seen[x.slug] = 1;
+      }
+    }
+    for (i = 0; i < (cfg.packages || []).length; i++) { x = cfg.packages[i]; if (!String(x.name || "").trim() || !String(x.price || "").trim()) return "প্যাকেজ #" + (i + 1) + " এর নাম ও দাম দিন।"; }
+    var t = cfg.tracking || {};
+    if (t.fbPixelId && !/^\d{5,20}$/.test(String(t.fbPixelId).trim())) return "Facebook Pixel ID শুধু সংখ্যা হবে (৫–২০ অঙ্ক)।";
+    if (t.sample !== "" && t.sample != null && !(Number(t.sample) >= 1 && Number(t.sample) <= 100)) return "ট্র্যাকিংয়ের শতাংশ ১ থেকে ১০০ এর মধ্যে দিন।";
+    if (cfg.form && cfg.form.cooldownMinutes !== "" && cfg.form.cooldownMinutes != null && !(Number(cfg.form.cooldownMinutes) >= 1 && Number(cfg.form.cooldownMinutes) <= 120)) return "ফর্মের কুলডাউন ১ থেকে ১২০ মিনিটের মধ্যে দিন।";
+    var th = cfg.theme || {}, bad = Object.keys(th).filter(function (k) { return /^#/.test(th[k]) && !/^#[0-9a-fA-F]{3,8}$/.test(th[k]); })[0];
+    if (bad) return "রঙের মান ঠিক নয়: " + bad;
+    if (th.radius !== "" && th.radius != null && !(Number(th.radius) >= 0 && Number(th.radius) <= 40)) return "কর্নার রেডিয়াস ০ থেকে ৪০ এর মধ্যে দিন।";
+    var du = String((cfg.sheetView || {}).demoUrl || "").trim(); if (du && !/^https:\/\/docs\.google\.com\/\S+$/.test(du)) return "ডেমো শিটের লিংক https://docs.google.com/ দিয়ে শুরু হতে হবে।";
+    var au = String(cfg.apiEndpoint || "").trim(); if (au && !/^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]+\/exec$/.test(au)) return "API লিংকটি Apps Script এর /exec লিংক হতে হবে।";
+    if (!(cfg.nav || []).length) return "মেনুতে কমপক্ষে একটি লিংক রাখুন।";
+    return "";
+  }
+  function configText() {
+    var out = merge(clone(DEF), payload());
+    return "/* এই ফাইলটি Admin Panel (admin.html) দিয়ে তৈরি হয়। হাতে এডিট না করে Admin Panel ব্যবহার করুন। */\nwindow.SITE_CONFIG = " + JSON.stringify(out, null, 1) + ";\n";
+  }
+  function exportFiles() {
+    var err = validate(); if (err) { toast(err, "bad"); return; }
+    var text = configText(), used = JSON.stringify(payload()), paths = Object.keys(pending).filter(function (p) { return used.indexOf(p) > -1; }), enc = new TextEncoder();
+    if (!paths.length) { download("config.js", text, "text/javascript"); toast("config.js নামানো হয়েছে → প্রজেক্টের js/ ফোল্ডারে রিপ্লেস করে push করুন", "ok"); return; }
+    Promise.all(paths.map(function (p) { return pending[p].blob.arrayBuffer().then(function (b) { return { name: p, data: new Uint8Array(b) }; }); })).then(function (files) {
+      files.unshift({ name: "js/config.js", data: enc.encode(text) });
+      download("site-update.zip", makeZip(files), "application/zip"); toast("site-update.zip নামানো হয়েছে → Extract করে প্রজেক্টে মার্জ করুন", "ok");
+    });
+  }
+  function publish() {
+    if (!serverMode) { toast("লাইভ প্রকাশের জন্য Setup পেজে Google Sheet/API যুক্ত করে লগইন করুন। এখন “⬇️ config.js” ব্যবহার করুন।", "bad"); return; }
+    var err = validate(); if (err) { toast(err, "bad"); return; }
+    var b = $("#pubBtn"); b.disabled = true; b.textContent = "প্রকাশ হচ্ছে…";
+    api("saveConfig", { settings: pubPayload() }).then(function (r) {
+      if (!r.success) throw new Error(r.error);
+      isDirty = false; published = JSON.stringify(pubPayload()); status();
+      try { localStorage.removeItem(DKEY); localStorage.removeItem("hn_live_v1"); } catch (e) {}
+      toast("🚀 প্রকাশিত! লাইভ সাইটে সাথে সাথে (বড়জোর ৫ মিনিটে) আপডেট হবে", "ok");
+    }).catch(function (e) { toast(e.message || "প্রকাশ হয়নি", "bad"); }).then(function () { b.disabled = false; b.textContent = "🚀 প্রকাশ করুন"; });
+  }
+
+  /* ---------- login / session ---------- */
+  function fixCfg() {
+    cfg.home = cfg.home || {}; cfg.home.show = cfg.home.show || {}; cfg.home.order = (cfg.home.order || []).filter(function (id) { return HOME[id]; });
+    HOME_IDS.forEach(function (id) { if (cfg.home.order.indexOf(id) < 0) cfg.home.order.push(id); });
+    ["services", "portfolio", "packages", "testimonials", "faq", "team", "nav"].forEach(function (k) { if (!Array.isArray(cfg[k])) cfg[k] = []; });
+    cfg.layout = cfg.layout === "t2" ? "t2" : "t1"; cfg.ui = cfg.ui || {}; cfg.pageSections = cfg.pageSections || {}; cfg.sheetView = cfg.sheetView || {}; cfg.text = cfg.text || {};
+    ["services", "portfolio", "about", "pricing"].forEach(function (k) { cfg.pageSections[k] = cfg.pageSections[k] || {}; });
+    cfg.theme = cfg.theme || {}; cfg.tracking = cfg.tracking || { fbPixelId: "", activity: true, sample: 100 }; cfg.form = cfg.form || {}; cfg.form.labels = cfg.form.labels || {}; cfg.contact = cfg.contact || {}; cfg.contact.social = cfg.contact.social || {};
+    cfg.seo = cfg.seo || {}; cfg.seo.pages = cfg.seo.pages || {}; SEO_PAGES.forEach(function (p) { cfg.seo.pages[p[0]] = cfg.seo.pages[p[0]] || {}; });
+    cfg.legal = cfg.legal || {}; ["privacy", "terms"].forEach(function (k) { cfg.legal[k] = cfg.legal[k] || {}; }); cfg.footer = cfg.footer || {}; cfg.footer.columns = cfg.footer.columns || [];
+    cfg.portfolio.forEach(function (p) { p.results = p.results || []; p.tags = p.tags || []; p.gallery = p.gallery || []; });
+    cfg.services.forEach(function (s) { s.features = s.features || []; });
+  }
+  function showLogin(msg) { $("#appView").hidden = true; $("#loginView").hidden = false; var e = $("#loginErr"); e.hidden = !msg; e.textContent = msg || ""; }
+  function showApp() { $("#loginView").hidden = true; $("#appView").hidden = false; }
+  function enter(silent) {
+    showApp(); $("#main").textContent = ""; $("#main").appendChild(h("div", { class: "empty" }, h("span", { class: "spinner" }), "লোড হচ্ছে…"));
+    api("getConfig").then(function (d) {
+      if (!d.success) throw new Error(d.error);
+      serverMode = true; cfg = merge(clone(DEF), d.settings || {}); fixCfg(); sheetUrl = d.sheetUrl || ""; published = JSON.stringify(pubPayload()); isDirty = false;
+      var draft = null; try { draft = JSON.parse(localStorage.getItem(DKEY) || "null"); } catch (e) {}
+      if (!silent && draft && draft.data && JSON.stringify(draft.data) !== JSON.stringify(payload()) && confirm("আগের অপ্রকাশিত ড্রাফট পাওয়া গেছে। ফিরিয়ে আনবেন?")) { cfg = merge(clone(DEF), draft.data); fixCfg(); isDirty = true; }
+      status(); render();
+    }).catch(function (e) { if (token) { showApp(); $("#main").textContent = ""; $("#main").appendChild(h("div", { class: "err-box" }, e.message || "লোড করা যায়নি")); } });
+  }
+  function enterSetup() {
+    showApp(); serverMode = false;
+    var draft = null; try { draft = JSON.parse(localStorage.getItem(DKEY) || "null"); } catch (e) {}
+    cfg = merge(clone(DEF), draft && draft.data ? draft.data : {}); fixCfg(); isDirty = !!draft; page = "setup"; status(); render();
+  }
+  function doLogout(expired) {
+    if (isDirty && !expired && !confirm("প্রকাশ করা হয়নি এমন পরিবর্তন আছে (ড্রাফট এই ব্রাউজারে থাকবে)। লগআউট করবেন?")) return;
+    if (token && !expired) api("logout").catch(function () {});
+    token = ""; try { sessionStorage.removeItem("hn_adm_tok"); } catch (e) {}
+    isDirty = false; serverMode = false; showLogin(expired ? "সেশন শেষ হয়েছে। আবার লগইন করুন।" : "");
+  }
+  $("#loginForm").onsubmit = function (e) {
+    e.preventDefault(); var b = $("#loginBtn"); b.disabled = true; b.textContent = "যাচাই হচ্ছে…";
+    api("login", { password: $("#pw").value }).then(function (d) {
+      if (!d.success) throw new Error(d.error);
+      token = d.token; try { sessionStorage.setItem("hn_adm_tok", token); } catch (x) {}
+      $("#pw").value = ""; enter(false);
+    }).catch(function (err) { showLogin(err.message || "লগইন হয়নি"); }).then(function () { b.disabled = false; b.textContent = "লগইন করুন"; });
+  };
+  $("#pubBtn").onclick = publish; $("#expBtn").onclick = exportFiles;
+  $("#menuBtn").onclick = function () { $("#side").classList.add("open"); $("#scrim").classList.add("show"); };
+  $("#scrim").onclick = closeMenu;
+  $("#previewBtn").onclick = function () {
+    try { localStorage.setItem(DKEY, JSON.stringify({ data: payload() })); } catch (e) {}
+    if (window.innerWidth >= 1000) { var on = $("#pv").hidden; $("#pv").hidden = !on; if (on) $("#pvFrame").src = $("#pvPage").value + "?preview=1"; } else window.open($("#pvPage").value + "?preview=1", "_blank");
+  };
+  $("#pvPage").onchange = function () { $("#pvFrame").src = $("#pvPage").value + "?preview=1"; };
+  $("#pvClose").onclick = function () { $("#pv").hidden = true; };
+  document.addEventListener("keydown", function (e) { if ((e.ctrlKey || e.metaKey) && e.key === "s" && cfg) { e.preventDefault(); publish(); } });
+
+  /* ---------- start ---------- */
+  if (!API) { $("#loginView").hidden = true; enterSetup(); }
+  else if (token) enter(false);
+  else showLogin("");
+})();
+
+</script>
+</body>
+</html>

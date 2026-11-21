@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /case
+
+Sitemap: https://asciisolutions.example/sitemap.xml
